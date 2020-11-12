@@ -19,10 +19,9 @@
         "serve-debug": "nodemon --inspect dist/server.js",
         "start": "npm run serve",
         "test": "jest --forceExit --coverage --verbose",
-        "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run watch-node\"",
-        "watch-debug": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run serve-debug\"",
+        "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+        "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
         "watch-node": "nodemon dist/server.js",
-        "watch-sass": "node-sass -w src/public/css/main.scss dist/public/css/main.css",
         "watch-test": "npm run test -- --watchAll",
         "watch-ts": "tsc -w"
     },
@@ -33,22 +32,18 @@
         "body-parser": "^1.19.0",
         "compression": "^1.7.4",
         "connect-mongo": "^3.0.0",
+        "convict": "^6.0.0",
         "dotenv": "^8.2.0",
         "errorhandler": "^1.5.1",
         "express": "^4.17.1",
-        "express-flash": "0.0.2",
         "express-session": "^1.16.2",
         "express-validator": "^6.2.0",
-        "fbgraph": "^1.4.4",
         "lodash": "^4.17.19",
         "lusca": "^1.6.1",
         "mongoose": "^5.7.5",
-        "nodemailer": "^6.3.0",
-        "passport": "^0.4.0",
-        "passport-facebook": "^3.0.0",
-        "passport-local": "^1.0.0",
         "pug": "^2.0.4",
-        "winston": "^3.2.1"
+        "winston": "^3.2.1",
+        "winston-console-format": "^1.0.8"
     },
     "devDependencies": {
         "@types/async": "^3.0.2",
@@ -58,6 +53,7 @@
         "@types/chai": "^4.2.3",
         "@types/compression": "^1.0.1",
         "@types/concurrently": "^4.1.0",
+        "@types/convict": "^4.2.1",
         "@types/connect-mongo": "^3.0.0",
         "@types/errorhandler": "^0.0.32",
         "@types/eslint": "^6.1.1",
@@ -93,6 +89,6 @@
         "supertest": "^4.0.2",
         "ts-jest": "^24.1.0",
         "ts-node": "^8.4.1",
-        "typescript": "^3.6.3"
+        "typescript": "^4.0.5"
     }
 }
