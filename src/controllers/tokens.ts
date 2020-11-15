@@ -9,7 +9,11 @@ export const getTokenPairings = async (req: Request, res: Response) => {
     try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
-        const pairs = await Pairing.find({});
+        const pairs = await Pairing.find({}, {_id: false});
+        pairs.map(pair => {
+            pair.symbol = pair.src_coin;
+            pair.name = pair.src_coin;
+        })
         res.json( { tokens: pairs });
     } catch (e) {
         res.status(500);

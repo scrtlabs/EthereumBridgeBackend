@@ -7,6 +7,8 @@ import mongo from "connect-mongo";
 //import multer from "multer";
 import mongoose from "mongoose";
 
+import cors from 'cors';
+
 import bluebird from "bluebird";
 import { SESSION_SECRET } from "./util/secrets";
 import logger from "./util/logger";
@@ -38,8 +40,11 @@ mongoose.connect(mongoUrl, {
     // process.exit();
 });
 
+// todo remove this eventually
+app.use(cors())
+
 // Express configuration
-app.set("port", config.port || 2900);
+app.set("port", config.port || 8000);
 
 app.use(compression());
 app.use(bodyParser.json());

@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 
 
 export interface PairingDocument extends mongoose.Document {
+    name: string;
+    decimals: number;
+    symbol: string;
     dst_address: string;
     dst_coin: string;
     dst_network: string;
@@ -19,7 +22,13 @@ export const pairingSchema = new mongoose.Schema({
     src_address: String,
     src_coin: String,
     src_network: String,
-}, { timestamps: true });
+    name: String,
+    symbol: String,
+    decimals: {
+        type: Number,
+        default: 18,
+    },
+}, { collection: 'token_pairing' });
 
 // userSchema.pre("save", function save(next) {
 //     const user = this as UserDocument;
