@@ -16,9 +16,8 @@ const MongoStore = mongo(session);
 
 import * as swapController from "./controllers/swaps";
 import * as tokenController from "./controllers/tokens";
-
+import Cache from './util/cache';
 import config from "./util/config";
-
 
 // Create Express server
 const app = express();

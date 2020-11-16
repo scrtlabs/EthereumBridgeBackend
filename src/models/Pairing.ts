@@ -12,6 +12,9 @@ export interface PairingDocument extends mongoose.Document {
     src_address: string;
     src_coin: string;
     src_network: string;
+    totalLocked: string;
+    totalLockedNormal: string;
+    totalLockedUSD: string;
 }
 
 
@@ -28,6 +31,9 @@ export const pairingSchema = new mongoose.Schema({
         type: Number,
         default: 18,
     },
+    totalLocked: String,
+    totalLockedNormal: String,
+    totalLockedUSD: String,
 }, { collection: 'token_pairing' });
 
 // userSchema.pre("save", function save(next) {

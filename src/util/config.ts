@@ -38,6 +38,18 @@ const config = convict({
         default: "",
         arg: "db",
         env: "DB_URL"
+    },
+    ethProvider: {
+        format: String,
+        default: "",
+        arg: "eth_provider",
+        env: "ETH_PROVIDER"
+    },
+    walletAddress: {
+        format: String,
+        default: "",
+        arg: "walletAddress",
+        env: "WALLET_ADDRESS"
     }
 });
 
