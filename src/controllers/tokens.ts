@@ -57,16 +57,3 @@ export const getToken = async (req: Request, res: Response) => {
     }
 };
 
-export const getTotalStored = async (req: Request, res: Response) => {
-
-    try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        // @ts-ignore
-        const pairs = await Pairing.find({});
-        res.json( { tokens: pairs });
-    } catch (e) {
-        res.status(500);
-        res.send(`Error: ${e}`);
-    }
-
-};

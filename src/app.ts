@@ -16,8 +16,12 @@ const MongoStore = mongo(session);
 
 import * as swapController from "./controllers/swaps";
 import * as tokenController from "./controllers/tokens";
+import * as opController from "./controllers/operations";
+
 import Cache from './util/cache';
 import config from "./util/config";
+
+// import Agenda from "agenda";
 
 // Create Express server
 const app = express();
@@ -58,6 +62,21 @@ app.use(session({
     })
 }));
 
+// const agenda = new Agenda({mongo: mongoose.connection.useDb('agenda')});
+// let connectionEstablished = false;
+// // When the connection is established, set the flag
+// agenda.on('ready', function() {
+//     connectionEstablished = true;
+//     logger.info('Agenda connected')
+// });
+//
+// // It's better practice to have this function defined on your agenda object
+// // When the server initializes rather than having initializing it only if a POST
+// // request occurrs.
+// agenda.define('test', function () {
+//     console.log('Test');
+// });
+
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
 
@@ -67,5 +86,7 @@ app.get("/tokens/:token", tokenController.getToken);
 app.get("/swaps/", swapController.getAllSwaps);
 app.get("/swaps/:swap", swapController.getSwapInfo);
 
+app.post("/operations/", opController.newOperation);
+app.get("/operations/:id", opController.getOperation);
 
 export default app;

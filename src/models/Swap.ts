@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
 
-enum SwapStatus {
+export enum SwapStatus {
     SWAP_UNSIGNED,
     SWAP_SIGNED,
     SWAP_SUBMITTED,
     SWAP_CONFIRMED,
     SWAP_FAILED,
     SWAP_RETRY,
+    SWAP_NOT_EXIST
 }
 
 
@@ -22,7 +23,7 @@ export interface SwapDocument extends mongoose.Document {
     src_coin: string;
     src_network: string;
     src_tx_hash: string;
-    status: SwapStatus;
+    status: number;
 }
 
 export const swapSchema = new mongoose.Schema({
@@ -38,8 +39,8 @@ export const swapSchema = new mongoose.Schema({
     src_tx_hash: String,
     status: {
         type: Number,
-        get: (value: number) => SwapStatus[value],
-        set: (status: SwapStatus) => status.valueOf(),
+        //get: (value: number) => SwapStatus[value],
+        //set: (status: SwapStatus) => status.valueOf(),
     },
 }, { collection: 'swap' });
 
