@@ -1,11 +1,12 @@
 import {Request, Response} from "express";
-import {Swap} from "../models/Swap";
+import {Swap, SwapDocument} from "../models/Swap";
 import logger from "../util/logger";
+import {Operation, OperationDocument} from "../models/Operation";
 
 export const getAllSwaps = async (req: Request, res: Response) => {
     try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        const swaps = await Swap.find({}, {_id: false, unsigned_tx: false, sequence: false})
+        const swaps = await Swap.find({}, {_id: false, unsigned_tx: false, sequence: false}).sort({ _id: -1 })
         logger.debug(swaps);
         res.json( { swaps: swaps});
     } catch (e) {
@@ -16,13 +17,16 @@ export const getAllSwaps = async (req: Request, res: Response) => {
 };
 
 export const getSwapInfo = async (req: Request, res: Response) => {
-    const srcHash: string = req.params.swap;
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    const swap = await Swap.findOne({src_tx_hash: srcHash});
-    if (!swap) {
-        res.status(404);
+    const id = req.params.id
+    let swap: SwapDocument;
+
+    const operation: OperationDocument = await Operation.findOne({id: id}, {_id: false})
+    if (operation && operation.swap) {
+        swap = await Swap.findById(operation.swap);
     } else {
-        res.json({swap: swap});
+        res.status(404);
+        res.send(`Not found`);
     }
+    res.json({swap: swap});
 };
 
