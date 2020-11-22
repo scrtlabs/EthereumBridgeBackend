@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import mongoose, {Schema} from "mongoose";
-import {SwapStatus} from "./Swap";
+import mongoose, {Schema, Types} from "mongoose";
+import {SwapDocument, Swap} from "./Swap";
 
 
 export interface OperationDocument extends mongoose.Document {
     id: string;
     status: number;
     transactionHash: string;
-    swap?: Schema.Types.ObjectId;
+    swap?: SwapDocument["_id"]; //string | typeof Types.ObjectId;
 }
 
 
@@ -18,7 +18,7 @@ export const operationSchema = new Schema({
         // get: (value: number) => SwapStatus[value],
         // set: (status: SwapStatus) => status.valueOf(),
     },
-    swap:{
+    swap: {
         required: false,
         type: Schema.Types.ObjectId,
         ref: "swap"},

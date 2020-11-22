@@ -26,24 +26,19 @@ export const getOperation = async (req: Request, res: Response) => {
 
     let tx: SwapDocument;
     if (operation.swap) {
-        console.log("hey2");
         tx = await Swap.findById(operation.swap);
-        console.log("yo2");
-
     } else if (operation.transactionHash) {
         tx = await Swap.findOne({src_tx_hash: operation.transactionHash});
         if (tx) {
-            await operation.update({swap: tx, status: tx.status});
-            console.log("yo");
+            logger.debug(`found ${tx._id}`)
+            const result = await operation.updateOne({swap: tx._id, status: tx.status});
+            logger.debug(`updated operation: ${operation.swap}, ${result}`)
         }
     }
-    console.log("hey3");
     res.json({operation: operation, swap: tx});
 };
 
 export const newOperation = async (req: Request, res: Response) => {
-
-    console.log(JSON.stringify(req.body));
 
     await check("id", "Generated ID cannot be empty").not().isEmpty().run(req);
     await check("transactionHash", "transaction hash cannot be empty").not().isEmpty().run(req);
