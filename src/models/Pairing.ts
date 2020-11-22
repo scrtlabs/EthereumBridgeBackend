@@ -34,7 +34,7 @@ export const pairingSchema = new mongoose.Schema({
     totalLocked: String,
     totalLockedNormal: String,
     totalLockedUSD: String,
-}, { collection: 'token_pairing' });
+}, { collection: "token_pairing" });
 
 // userSchema.pre("save", function save(next) {
 //     const user = this as UserDocument;

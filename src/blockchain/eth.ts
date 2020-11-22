@@ -13,7 +13,7 @@ const erc20ABI = [
             }
         ],
         payable: false,
-        type: 'function' as 'function'
+        type: "function" as "function"
     },
     {
         constant: true,
@@ -26,7 +26,7 @@ const erc20ABI = [
             }
         ],
         payable: false,
-        type: "function" as 'function'
+        type: "function" as "function"
     },
     {
         constant: true,
@@ -44,7 +44,7 @@ const erc20ABI = [
             }
         ],
         payable: false,
-        type: "function" as 'function'
+        type: "function" as "function"
     },
     {
         constant: true,
@@ -57,25 +57,25 @@ const erc20ABI = [
             }
         ],
         payable: false,
-        type: "function" as 'function'
+        type: "function" as "function"
     }
-]
+];
 
 const web3 = new W3(new W3.providers.HttpProvider(config.ethProvider));
 
 export const getEthBalance = async (address: string): Promise<string> => {
-    return await web3.eth.getBalance(address)
+    return await web3.eth.getBalance(address);
 };
 
 export const getErcBalance = async (address: string, token: string): Promise<string> => {
-    let contract = new web3.eth.Contract(erc20ABI, token);
+    const contract = new web3.eth.Contract(erc20ABI, token);
     // @ts-ignore
-    let result = await contract.balanceOf(address);
+    const result = await contract.balanceOf(address);
 
     return web3.utils.toBN(result).toString();
 };
 
 // todo: this
 export const getErcName = async (address: string): Promise<string> => {
-    return await web3.eth.getBalance(address)
+    return await web3.eth.getBalance(address);
 };

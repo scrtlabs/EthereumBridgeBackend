@@ -2,13 +2,13 @@
 import mongoose from "mongoose";
 
 export enum SwapStatus {
-    SWAP_UNSIGNED,
+    SWAP_UNSIGNED = 1,
     SWAP_SIGNED,
     SWAP_SUBMITTED,
     SWAP_CONFIRMED,
     SWAP_FAILED,
     SWAP_RETRY,
-    SWAP_NOT_EXIST
+    SWAP_NOT_EXIST = 9
 }
 
 
@@ -42,6 +42,6 @@ export const swapSchema = new mongoose.Schema({
         //get: (value: number) => SwapStatus[value],
         //set: (status: SwapStatus) => status.valueOf(),
     },
-}, { collection: 'swap' });
+}, { collection: "swap" });
 
 export const Swap = mongoose.model<SwapDocument>("swap", swapSchema);

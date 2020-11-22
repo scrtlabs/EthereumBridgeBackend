@@ -5,7 +5,7 @@ class Cache {
     private cache: NodeCache;
 
     constructor() {
-        this.cache = new NodeCache()
+        this.cache = new NodeCache();
 
     }
 
@@ -23,7 +23,7 @@ class Cache {
             return value;
         }
 
-        const data = await retrieveData()
+        const data = await retrieveData();
         this.cache.set(key, data, 120);
         return data;
     }

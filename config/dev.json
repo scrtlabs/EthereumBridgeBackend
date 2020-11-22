@@ -1,9 +1,4 @@
 {
-  "dbName": "test_db",
-  "dbUser": "",
-  "dbPass": "",
-  "db": "mongodb://localhost:27017",
   "port": 8000,
-  "ethProvider": "http://localhost:8545",
-  "walletAddress": "0xdaa04A801b746C229BD73045b539329c3efB6bE3"
+  "app_url": "http://localhost:3000"
 }

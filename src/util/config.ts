@@ -1,10 +1,11 @@
-// config.js
+import fs from "fs";
+
 require("dotenv").config();
 import convict from "convict";
 
 const config = convict({
     env: {
-        format: ["prod", "dev", "test"],
+        format: ["production", "dev", "test"],
         default: "dev",
         arg: "nodeEnv",
         env: "NODE_ENV"
@@ -50,11 +51,20 @@ const config = convict({
         default: "",
         arg: "walletAddress",
         env: "WALLET_ADDRESS"
+    },
+    appUrl: {
+        format: String,
+        default: "http://localhost:3000",
+        arg: "appUrl",
+        env: "APP_URL"
     }
 });
 
 const env = config.get("env");
-config.loadFile(`./config/${env}.json`);
+
+if (fs.existsSync(`./config/${env}.json`)) {
+    config.loadFile(`./config/${env}.json`);
+}
 
 config.validate({ allowed: "strict" }); // throws error if config does not conform to schema
 

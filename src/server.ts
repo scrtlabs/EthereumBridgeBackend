@@ -1,34 +1,12 @@
 import errorHandler from "errorhandler";
-
+import process from "process";
 import app from "./app";
 import logger from "./util/logger";
-//import {Swap} from "./models/Swap";
 
 /**
  * Error Handler. Provides full stack - remove for production
  */
 app.use(errorHandler());
-
-// function setupLocalEnv() {
-//     // clear document
-//     Swap.deleteMany({}, () => {
-//         // add test user
-//         const be = new ClientDbObj({
-//             appkey: "testappkey",
-//             name: "testCustomer",
-//             users: []
-//         });
-//
-//         be.save((err) => {
-//                 if (err) {
-//                     logger.error(`Failed to save test user to DB: ${err}`);
-//                 } else {
-//                     logger.info("Saved test user successfully");
-//                 }
-//             }
-//         );
-//     });
-// };
 
 /**
  * Start Express server.
@@ -44,5 +22,11 @@ const server = app.listen(app.get("port"), () => {
         //logger.info(`App is running in ${app.get("env")} mode`);
     }
 });
+
+
+process.on('SIGINT', () => {
+    logger.info("Interrupted")
+    process.exit(0)
+})
 
 export default server;

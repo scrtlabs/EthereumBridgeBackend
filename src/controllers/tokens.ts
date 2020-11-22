@@ -10,13 +10,13 @@ const cache = Cache.getInstance();
 // import logger from "../util/logger";
 
 export const getTokenPairings = async (req: Request, res: Response) => {
-    let pairs: PairingDocument[] = await cache.get('pairs', async () => {
-        let pairs = await Pairing.find({}, {_id: false})
+    const pairs: PairingDocument[] = await cache.get("pairs", async () => {
+        const pairs = await Pairing.find({}, {_id: false});
         return await Promise.all(pairs.map(async (pair) => {
             pair.symbol = pair.src_coin;
             pair.name = pair.src_coin;
-            pair.decimals = 18
-            if (pair.src_address === 'native') {
+            pair.decimals = 18;
+            if (pair.src_address === "native") {
                 pair.totalLocked = await getEthBalance(config.walletAddress).catch(
                     () => "0"
                 );

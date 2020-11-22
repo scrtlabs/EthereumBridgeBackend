@@ -21,7 +21,7 @@ export const operationSchema = new Schema({
     swap:{
         required: false,
         type: Schema.Types.ObjectId,
-        ref: 'swap'},
+        ref: "swap"},
     transactionHash: String,
 });
 

@@ -30,7 +30,7 @@ export const logger = createLogger({
                 })
             )
         }),
-        new winston.transports.File({ filename: "debug.log", level: "debug" })
+        //new winston.transports.File({ filename: "debug.log", level: "debug" })
     ]
 });
 
@@ -47,6 +47,9 @@ export const logger = createLogger({
 
 if (process.env.NODE_ENV !== "production") {
     logger.debug("Logging initialized at debug level");
+} else {
+    logger.info(`Logging initialized at ${logger.level}`)
 }
+
 
 export default logger;

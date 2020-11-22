@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import {Operation, OperationDocument} from "../models/Operation";
 import {Swap, SwapDocument, swapSchema, SwapStatus} from "../models/Swap";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import logger from "../util/logger";
 import {check, validationResult} from "express-validator";
 
@@ -20,30 +20,30 @@ import {check, validationResult} from "express-validator";
 
 export const getOperation = async (req: Request, res: Response) => {
 
-    const id = req.params.id
+    const id = req.params.id;
 
-    const operation: OperationDocument = await Operation.findOne({id: id}, {_id: false})
+    const operation: OperationDocument = await Operation.findOne({id: id}, {_id: false});
 
-    let tx: SwapDocument
+    let tx: SwapDocument;
     if (operation.swap) {
-        console.log('hey2')
+        console.log("hey2");
         tx = await Swap.findById(operation.swap);
-        console.log('yo2')
+        console.log("yo2");
 
     } else if (operation.transactionHash) {
         tx = await Swap.findOne({src_tx_hash: operation.transactionHash});
         if (tx) {
             await operation.update({swap: tx, status: tx.status});
-            console.log('yo')
+            console.log("yo");
         }
     }
-    console.log('hey3')
+    console.log("hey3");
     res.json({operation: operation, swap: tx});
 };
 
 export const newOperation = async (req: Request, res: Response) => {
 
-    console.log(JSON.stringify(req.body))
+    console.log(JSON.stringify(req.body));
 
     await check("id", "Generated ID cannot be empty").not().isEmpty().run(req);
     await check("transactionHash", "transaction hash cannot be empty").not().isEmpty().run(req);
@@ -61,7 +61,7 @@ export const newOperation = async (req: Request, res: Response) => {
     });
 
     await operation.save();
-    console.log('cya')
+    console.log("cya");
     res.json({operation});
 };
 
@@ -89,25 +89,25 @@ export interface IAction {
 }
 
 export enum STATUS {
-    ERROR = 'error',
-    SUCCESS = 'success',
-    WAITING = 'waiting',
-    IN_PROGRESS = 'in_progress',
+    ERROR = "error",
+    SUCCESS = "success",
+    WAITING = "waiting",
+    IN_PROGRESS = "in_progress",
 }
 
 export enum ACTION_TYPE {
     // ETH_TO_ONE
-    'getHRC20Address' = 'getHRC20Address',
-    'approveEthManger' = 'approveEthManger',
-    'lockToken' = 'lockToken',
-    'waitingBlockNumber' = 'waitingBlockNumber',
-    'mintToken' = 'mintToken',
-    'mintTokenRollback' = 'mintTokenRollback',
+    "getHRC20Address" = "getHRC20Address",
+    "approveEthManger" = "approveEthManger",
+    "lockToken" = "lockToken",
+    "waitingBlockNumber" = "waitingBlockNumber",
+    "mintToken" = "mintToken",
+    "mintTokenRollback" = "mintTokenRollback",
 
     // ONE_TO_ETH
-    'approveHmyManger' = 'approveHmyManger',
-    'burnToken' = 'burnToken',
-    'waitingBlockNumberHarmony' = 'waitingBlockNumberHarmony',
-    'unlockToken' = 'unlockToken',
-    'unlockTokenRollback' = 'unlockTokenRollback',
+    "approveHmyManger" = "approveHmyManger",
+    "burnToken" = "burnToken",
+    "waitingBlockNumberHarmony" = "waitingBlockNumberHarmony",
+    "unlockToken" = "unlockToken",
+    "unlockTokenRollback" = "unlockTokenRollback",
 }
