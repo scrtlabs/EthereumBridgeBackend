@@ -20,10 +20,14 @@ import {check, validationResult} from "express-validator";
 
 export const getOperation = async (req: Request, res: Response) => {
 
-    const id = req.params.id;
+    const id = req.params.operation;
 
     const operation: OperationDocument = await Operation.findOne({id: id}, {_id: false});
-
+    if (!operation) {
+        res.status(404);
+        res.send("Not found");
+        return;
+    }
     let tx: SwapDocument;
     if (operation.swap) {
         tx = await Swap.findById(operation.swap);
