@@ -5,19 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 import logger from "../util/logger";
 import {check, validationResult} from "express-validator";
 
-// export const getAllSwaps = async (req: Request, res: Response) => {
-//     try {
-//         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-//         const swaps = await Swap.find({}, {_id: false, unsigned_tx: false, sequence: false})
-//         logger.debug(swaps);
-//         res.json( { swaps: swaps});
-//     } catch (e) {
-//         res.status(500);
-//         res.send(`Error: ${e}`);
-//     }
-//
-// };
-
 export const getOperation = async (req: Request, res: Response) => {
 
     const id = req.params.operation;
@@ -35,17 +22,21 @@ export const getOperation = async (req: Request, res: Response) => {
         tx = await Swap.findOne({src_tx_hash: operation.transactionHash});
         if (tx) {
             logger.debug(`found ${tx._id}`)
-            const result = await operation.updateOne({swap: tx._id, status: tx.status});
-            logger.debug(`updated operation: ${operation.swap}, ${result}`)
+            const result = await Operation.updateOne({id: id}, {swap: tx._id, status: tx.status});
+
+            if (result.error) {
+                logger.debug(`failed to update operation ${id}: with swap ${tx._id}: ${JSON.stringify(result.error)}`)
+            } else {
+                logger.debug(`Updated operation ${id}: with swap ${tx._id} successfully`)
+            }
         }
     }
-    res.json({operation: operation, swap: tx});
+    res.json({operation, swap: tx});
 };
 
 export const newOperation = async (req: Request, res: Response) => {
 
     await check("id", "Generated ID cannot be empty").not().isEmpty().run(req);
-    await check("transactionHash", "transaction hash cannot be empty").not().isEmpty().run(req);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         logger.error(`Error: ${JSON.stringify(errors.array())}`);
@@ -53,60 +44,40 @@ export const newOperation = async (req: Request, res: Response) => {
         res.send({result: "failed", message: errors.array()});
         return;
     }
-    const operation = new Operation({
+
+
+    let operation = new Operation({
         id: req.body.id,
-        transactionHash: req.body.transactionHash,
-        status: SwapStatus.SWAP_NOT_EXIST
+        status: SwapStatus.SWAP_WAIT_SEND
     });
 
+    if (req.body.transactionHash) {
+        operation.transactionHash = req.body.transactionHash;
+    }
+
     await operation.save();
-    console.log("cya");
     res.json({operation});
 };
 
-export interface IOperation {
-    id: string;
-    status: STATUS;
-    amount: number;
-    fee: number;
-    ethAddress: string;
-    oneAddress: string;
-    actions: Array<IAction>;
-    timestamp: number;
-    erc20Address?: string;
-}
+export const updateOperation = async (req: Request, res: Response) => {
 
-export interface IAction {
-    id: string;
-    type: ACTION_TYPE;
-    status: STATUS;
-    transactionHash: string;
-    error: string;
-    message: string;
-    timestamp: number;
-    payload: any;
-}
+    await check("transactionHash", "transactionHash cannot be empty").not().isEmpty().run(req);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        logger.error(`Error updating transaction: ${JSON.stringify(errors.array())}`);
+        res.status(400);
+        res.send({result: "failed", message: errors.array()});
+        return;
+    }
 
-export enum STATUS {
-    ERROR = "error",
-    SUCCESS = "success",
-    WAITING = "waiting",
-    IN_PROGRESS = "in_progress",
-}
+    let resp = await Operation.updateOne({id: req.params.operation},
+        {transactionHash: req.body.transactionHash, status: SwapStatus.SWAP_NOT_EXIST});
+    if (resp.error) {
+        logger.error(`Error updating transaction: ${JSON.stringify(resp.error)}`);
+        res.status(400);
+        res.send({result: "failed", message: resp.error});
+        return;
+    }
 
-export enum ACTION_TYPE {
-    // ETH_TO_ONE
-    "getHRC20Address" = "getHRC20Address",
-    "approveEthManger" = "approveEthManger",
-    "lockToken" = "lockToken",
-    "waitingBlockNumber" = "waitingBlockNumber",
-    "mintToken" = "mintToken",
-    "mintTokenRollback" = "mintTokenRollback",
-
-    // ONE_TO_ETH
-    "approveHmyManger" = "approveHmyManger",
-    "burnToken" = "burnToken",
-    "waitingBlockNumberHarmony" = "waitingBlockNumberHarmony",
-    "unlockToken" = "unlockToken",
-    "unlockTokenRollback" = "unlockTokenRollback",
-}
+    res.json({result: "success"})
+};

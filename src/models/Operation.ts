@@ -6,7 +6,7 @@ import {SwapDocument, Swap} from "./Swap";
 export interface OperationDocument extends mongoose.Document {
     id: string;
     status: number;
-    transactionHash: string;
+    transactionHash?: string;
     swap?: SwapDocument["_id"]; //string | typeof Types.ObjectId;
 }
 

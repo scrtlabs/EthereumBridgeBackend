@@ -84,6 +84,7 @@ app.get("/swaps/", swapController.getAllSwaps);
 app.get("/swaps/:swap", swapController.getSwapInfo);
 
 app.post("/operations/", opController.newOperation);
+app.post("/operations/:operation", opController.updateOperation);
 app.get("/operations/:operation", opController.getOperation);
 
 export default app;

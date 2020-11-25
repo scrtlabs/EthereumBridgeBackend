@@ -8,6 +8,7 @@ export enum SwapStatus {
     SWAP_CONFIRMED,
     SWAP_FAILED,
     SWAP_RETRY,
+    SWAP_WAIT_SEND,
     SWAP_NOT_EXIST = 9
 }
 
