@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import {Operation, OperationDocument} from "../models/Operation";
-import {Swap, SwapDocument, swapSchema, SwapStatus} from "../models/Swap";
+import {Swap, SwapDocument, SwapStatus} from "../models/Swap";
 import { v4 as uuidv4 } from "uuid";
 import logger from "../util/logger";
 import {check, validationResult} from "express-validator";
