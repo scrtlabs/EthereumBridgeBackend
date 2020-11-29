@@ -15,7 +15,6 @@ export const getTokenPairings = async (req: Request, res: Response) => {
         return await Promise.all(pairs.map(async (pair) => {
             pair.symbol = pair.src_coin;
             pair.name = pair.src_coin;
-            pair.decimals = 18;
             if (pair.src_address === "native") {
                 pair.totalLocked = await getEthBalance(config.walletAddress).catch(
                     () => "0"
