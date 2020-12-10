@@ -1,0 +1,12 @@
+{
+  "name": "test",
+  "version": "",
+  "description": "",
+  "scripts": {
+    "test": "echo \"No tests yet...\""
+  },
+  "author": "",
+  "dependencies": {
+    "mongodb": "^3.6.3"
+  }
+}
