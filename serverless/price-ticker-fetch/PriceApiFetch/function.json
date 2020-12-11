@@ -1,10 +1,11 @@
 {
+  "scriptFile": "../dist/PriceApiFetch/index.js",
   "bindings": [
     {
       "name": "myTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "*/30 * * * * *"
+      "schedule": "* */5 * * * *"
     }
   ]
 }
