@@ -1,5 +1,5 @@
 {
-  "scriptFile": "../dist/PriceApiFetch/index.js",
+  "scriptFile": "../dist/TotalLockedFetch/index.js",
   "bindings": [
     {
       "name": "myTimer",

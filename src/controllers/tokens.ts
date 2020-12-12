@@ -11,27 +11,7 @@ const cache = Cache.getInstance();
 
 export const getTokenPairings = async (req: Request, res: Response) => {
     const pairs: PairingDocument[] = await cache.get("pairs", async () => {
-        const pairs = await Pairing.find({}, {_id: false});
-        return await Promise.all(pairs.map(async (pair) => {
-            pair.symbol = pair.src_coin;
-            pair.name = pair.src_coin;
-            if (pair.src_address === "native") {
-                pair.totalLocked = await getEthBalance(config.walletAddress).catch(
-                    () => "0"
-                );
-                pair.totalLockedNormal = (Number.parseInt(pair.totalLocked) / 1e18).toString();
-                pair.totalLockedUSD = (Number.parseInt(pair.totalLocked) / 1e18 * 450).toString(10);
-            } else {
-                pair.totalLocked = await getErcBalance(config.walletAddress, pair.src_address).catch(
-                    () => "0"
-                );
-                // pair.totalLockedUSD = (Number.parseInt(pair.totalLocked) / 1e18 * 450).toString(10)
-                pair.totalLockedUSD = "0";
-                pair.totalLockedNormal = "0";
-            }
-            return pair;
-
-        }));
+        return Pairing.find({}, {_id: false});
     });
 
     try {
