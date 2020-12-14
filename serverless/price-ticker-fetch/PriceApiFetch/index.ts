@@ -43,6 +43,14 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 return {symbol: "USDT", price: "1.000"}
             }
 
+            if (symbol === "WBTC") {
+                let price = await fetch(binance_url + new URLSearchParams({
+                    symbol: `BTCUSDT`,
+                }));
+                let result = await price.json();
+                return {symbol: symbol, price: result.price};
+            }
+
             let price = await fetch(binance_url + new URLSearchParams({
                 symbol: `${symbol}USDT`,
             }));
