@@ -1,31 +1,31 @@
-import { AzureFunction, Context } from "@azure/functions"
+import { AzureFunction, Context } from "@azure/functions";
 import { MongoClient } from "mongodb";
 import fetch from "node-fetch";
 
-const binance_url = 'https://api.binance.com/api/v3/ticker/price?'
+const binanceUrl = "https://api.binance.com/api/v3/ticker/price?";
 
 interface PriceResult {
-    price: string,
-    symbol: string
+    price: string;
+    symbol: string;
 }
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    let client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
+    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
         }
     );
-    const db = await client.db(`${process.env["mongodbName"]}`)
+    const db = await client.db(`${process.env["mongodbName"]}`);
 
-    let tokens = await db.collection("token_pairing").find({}).limit(20).toArray().catch(
+    const tokens = await db.collection("token_pairing").find({}).limit(20).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
         }
     );
-    context.log(tokens)
+    context.log(tokens);
 
     let symbols;
 
@@ -33,33 +33,33 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
          symbols = tokens.map(t => t.display_props.symbol);
     } catch (e) {
         context.log(e);
-        throw new Error("Failed to get symbol for token")
+        throw new Error("Failed to get symbol for token");
     }
 
-    let prices: PriceResult[] = await Promise.all<PriceResult>(
+    const prices: PriceResult[] = await Promise.all<PriceResult>(
         symbols.map(async (symbol): Promise<PriceResult> => {
 
             if (symbol === "USDT") {
-                return {symbol: "USDT", price: "1.000"}
+                return {symbol: "USDT", price: "1.000"};
             }
 
             if (symbol === "WBTC") {
-                let price = await fetch(binance_url + new URLSearchParams({
-                    symbol: `BTCUSDT`,
+                const price = await fetch(binanceUrl + new URLSearchParams({
+                    symbol: "BTCUSDT",
                 }));
-                let result = await price.json();
+                const result = await price.json();
                 return {symbol: symbol, price: result.price};
             }
 
-            let price = await fetch(binance_url + new URLSearchParams({
+            const price = await fetch(binanceUrl + new URLSearchParams({
                 symbol: `${symbol}USDT`,
             }));
-            let result = await price.json();
+            const result = await price.json();
             return {symbol: symbol, price: result.price};
     })).catch(
         (err) => {
             context.log(err);
-            throw new Error("Failed to fetch price")
+            throw new Error("Failed to fetch price");
     });
 
     context.log(prices);
@@ -70,11 +70,11 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         })).catch(
         (err) => {
             context.log(err);
-            throw new Error("Failed to fetch price")
+            throw new Error("Failed to fetch price");
         });
 
-    let timeStamp = new Date().toISOString();
-    context.log('JavaScript timer trigger function ran!', timeStamp);
+    const timeStamp = new Date().toISOString();
+    context.log("JavaScript timer trigger function ran!", timeStamp);
 };
 
 export default timerTrigger;

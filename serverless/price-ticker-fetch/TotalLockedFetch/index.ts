@@ -1,4 +1,4 @@
-import { AzureFunction, Context } from "@azure/functions"
+import { AzureFunction, Context } from "@azure/functions";
 import { MongoClient } from "mongodb";
 import Web3 from "web3";
 
@@ -62,7 +62,7 @@ const erc20ABI = [
     }
 ];
 
-const w3 = new Web3(process.env['EthProvider']);
+const w3 = new Web3(process.env["EthProvider"]);
 
 const getEthBalance = async (address: string): Promise<string> => {
     return await w3.eth.getBalance(address);
@@ -78,49 +78,49 @@ const getErcBalance = async (address: string, token: string): Promise<string> =>
 };
 
 interface LockedResult {
-    balance: string,
-    balanceNormal: number,
-    balanceUSD: number,
-    address: string
+    balance: string;
+    balanceNormal: number;
+    balanceUSD: number;
+    address: string;
 }
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    let client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
+    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
         }
     );
-    const db = await client.db(`${process.env["mongodbName"]}`)
+    const db = await client.db(`${process.env["mongodbName"]}`);
 
-    let tokens = await db.collection("token_pairing").find({}).limit(20).toArray().catch(
+    const tokens = await db.collection("token_pairing").find({}).limit(20).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
         }
     );
-    context.log(tokens)
+    context.log(tokens);
 
-    let balances: LockedResult[] = await Promise.all<LockedResult>(
+    const balances: LockedResult[] = await Promise.all<LockedResult>(
         tokens.map(async (token): Promise<LockedResult> => {
 
             if (token.src_address === "native") {
-                const balance = await getEthBalance(process.env['MultisigAddress']);
-                const balanceNormal = Number(balance) / Math.pow(10, Number(token.decimals))
+                const balance = await getEthBalance(process.env["MultisigAddress"]);
+                const balanceNormal = Number(balance) / Math.pow(10, Number(token.decimals));
                 const balanceUSD = balanceNormal * Number(token.price);
-                return {address: token.src_address, balance, balanceNormal, balanceUSD}
+                return {address: token.src_address, balance, balanceNormal, balanceUSD};
             }
 
-            const balance = await getErcBalance(process.env['MultisigAddress'], token.src_address);
-            const balanceNormal = Number(balance) / Math.pow(10, Number(token.decimals))
+            const balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
+            const balanceNormal = Number(balance) / Math.pow(10, Number(token.decimals));
             const balanceUSD = balanceNormal * Number(token.price);
 
-            return {address: token.src_address, balance, balanceNormal, balanceUSD}
+            return {address: token.src_address, balance, balanceNormal, balanceUSD};
     })).catch(
         (err) => {
             context.log(err);
-            throw new Error("Failed to fetch balance")
+            throw new Error("Failed to fetch balance");
     });
 
     context.log(balances);
@@ -138,11 +138,11 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         })).catch(
         (err) => {
             context.log(err);
-            throw new Error("Failed to fetch price")
+            throw new Error("Failed to fetch price");
         });
 
-    let timeStamp = new Date().toISOString();
-    context.log('JavaScript timer trigger function ran!', timeStamp);
+    const timeStamp = new Date().toISOString();
+    context.log("JavaScript timer trigger function ran!", timeStamp);
 };
 
 export default timerTrigger;
