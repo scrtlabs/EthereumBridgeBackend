@@ -2,7 +2,7 @@ import { AzureFunction, Context } from "@azure/functions";
 import { MongoClient } from "mongodb";
 import Web3 from "web3";
 import {Contract} from "web3-eth-contract/types";
-import secretjs from "secretjs";
+import {SigningCosmWasmClient, Secp256k1Pen, BroadcastMode} from "secretjs";
 
 const erc20ABI = [
     {
@@ -57,6 +57,14 @@ const erc20ABI = [
     }
 ];
 
+// we don't really send anything encrypted, so this doesn't matter
+const seed = Uint8Array.from([
+    45, 252, 210, 141,  45, 110, 235, 100,
+    69, 230, 209,  79, 247,  18,   0,  12,
+    103, 160, 163, 178,   5,  52, 131, 242,
+    102, 148, 214, 132, 243, 222,  97,   4
+]);
+
 const faucet = {
     mnemonic: `${process.env["faucetMnemonic"]}`,
     address: `${process.env["faucetAddress"]}`
@@ -64,13 +72,20 @@ const faucet = {
 
 const pizzaAmount = `${process.env["pizzaAmount"]}`;
 
+
 const sendScrt = async (address: string) => {
-    const pen = await secretjs.Secp256k1Pen.fromMnemonic(faucet.mnemonic);
-    const client = new secretjs.SigningCosmWasmClient(`${process.env["secretNodeURL"]}`, faucet.address, (signBytes) => pen.sign(signBytes));
-
-    const ret = await client.sendTokens(address, [{amount: pizzaAmount, denom: "uscrt"}]);
-
-    return ret.rawLog;
+    const pen = await Secp256k1Pen.fromMnemonic(faucet.mnemonic);
+    const client = new SigningCosmWasmClient(`${process.env["secretNodeURL"]}`, faucet.address, (signBytes) => pen.sign(signBytes),
+        seed,
+        {
+            send: {
+                amount: [{ amount: "80000", denom: "uscrt" }],
+                gas: "80000",
+            },
+        },
+        BroadcastMode.Block
+    );
+    await client.sendTokens(address, [{amount: pizzaAmount, denom: "uscrt"}]);
 };
 
 const w3 = new Web3(process.env["EthProvider"]);
@@ -124,20 +139,19 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     context.log(`debug: addresses ${JSON.stringify(addresses)}`);
 
-    addresses.map(
-        async (addr) => {
-            const found = await db.collection("scrt_tip_addresses").findOne({address: addr});
-            context.log(`debug: found ${found}`);
-            if (!found) {
-                context.log(`debug: sending to ${addr}`);
-                const log = await sendScrt(addr);
-                context.log(`debug: sent to ${addr}, log: ${log}`);
-                await db.collection("scrt_tip_addresses").save({address: addr});
-            } else {
-                context.log(`debug: already sent to address ${addr}`);
-            }
+    for (const addr of addresses) {
+        const found = await db.collection("scrt_tip_addresses").findOne({address: addr});
+        context.log(`debug: found new address ${found}`);
+        if (!found) {
+            context.log(`debug: sending to ${addr}`);
+            await sendScrt(addr);
+
+            await db.collection("scrt_tip_addresses").save({address: addr});
+            context.log(`debug: sent to ${addr} and saved in db successfully`)
+        } else {
+            context.log(`debug: already sent to address ${addr}`);
         }
-    );
+    }
 
     await db.collection("swap_tracker_object").updateOne({src: "scrt_sender"}, { $set: { nonce: currentBlock }});
 
