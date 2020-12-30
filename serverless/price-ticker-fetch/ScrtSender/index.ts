@@ -147,7 +147,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             await sendScrt(addr);
 
             await db.collection("scrt_tip_addresses").save({address: addr});
-            context.log(`debug: sent to ${addr} and saved in db successfully`)
+            context.log(`debug: sent to ${addr} and saved in db successfully`);
         } else {
             context.log(`debug: already sent to address ${addr}`);
         }
