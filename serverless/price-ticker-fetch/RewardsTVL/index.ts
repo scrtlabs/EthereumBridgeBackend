@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable camelcase */
+
 import { AzureFunction, Context } from "@azure/functions";
 import { MongoClient } from "mongodb";
-import {CosmWasmClient, EnigmaUtils} from "secretjs";
+import { CosmWasmClient, EnigmaUtils } from "secretjs";
 
 interface RewardPoolData {
     pool_address: string;
@@ -11,18 +14,24 @@ interface RewardPoolData {
     deadline: string;
 }
 
-interface QueryDeadline {
-    end_height: {};
+function queryDeadline() {
+    return {
+        end_height: {},
+    };
 }
 
-interface QueryRewardPool {
-    reward_pool_balance: {};
+function queryRewardPool() {
+    return {
+        reward_pool_balance: {}
+    };
 }
 
-interface QuerySnip20Balance {
-    balance: {
-        address: string;
-        key: string;
+function querySnip20Balance(address: string, key: string) {
+    return {
+        balance: {
+            address: address,
+            key: key
+        }
     };
 }
 
@@ -40,10 +49,16 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     const queryClient = new CosmWasmClient(`${process.env["secretNodeURL"]}`, seed);
 
     pools.forEach(async (pool: RewardPoolData) => {
-        const addr = pool.pool_address;
+        const poolAddr = pool.pool_address;
+        const incTokenAddr = pool.inc_address;
+        const rewardsBalance = (await queryClient.queryContractSmart(poolAddr, queryRewardPool())).reward_pool_balance.balance;
+        const deadline = (await queryClient.queryContractSmart(poolAddr, queryDeadline())).end_height.height;
+        const incBalance = (await queryClient.queryContractSmart(incTokenAddr,
+            querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`))).balance.amount;
 
+        db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
+            { $set: { total_locked: incBalance, pending_rewards: rewardsBalance, deadline: deadline } });
     });
-
 };
 
 export default timerTrigger;

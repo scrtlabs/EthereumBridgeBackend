@@ -41,3 +41,4 @@ dist/**/*
 yarn.lock
 .env
 .env.testnet
+serverless/price-ticker-fetch/.eslintrc.json
