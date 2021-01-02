@@ -5,10 +5,16 @@ import { AzureFunction, Context } from "@azure/functions";
 import { MongoClient } from "mongodb";
 import { CosmWasmClient, EnigmaUtils } from "secretjs";
 
+interface Token {
+    symbol: string;
+    address: string;
+    decimals: number;
+}
+
 interface RewardPoolData {
     pool_address: string;
-    inc_symbol: string;
-    inc_address: string;
+    inc_token: Token;
+    rewards_token: Token;
     total_locked: string;
     pending_rewards: string;
     deadline: string;
@@ -50,14 +56,25 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     pools.forEach(async (pool: RewardPoolData) => {
         const poolAddr = pool.pool_address;
-        const incTokenAddr = pool.inc_address;
-        const rewardsBalance = (await queryClient.queryContractSmart(poolAddr, queryRewardPool())).reward_pool_balance.balance;
-        const deadline = (await queryClient.queryContractSmart(poolAddr, queryDeadline())).end_height.height;
-        const incBalance = (await queryClient.queryContractSmart(incTokenAddr,
-            querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`))).balance.amount;
+        const incTokenAddr = pool.inc_token.address;
+
+        // Query chain for things needed to be updated
+        let rewardsBalance, incBalance, deadline;
+        const queries = [
+            queryClient.queryContractSmart(poolAddr, queryRewardPool()),
+            queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`)),
+            queryClient.queryContractSmart(poolAddr, queryDeadline())
+        ];
+        [rewardsBalance, incBalance, deadline] = await Promise.all(queries);
 
         db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
-            { $set: { total_locked: incBalance, pending_rewards: rewardsBalance, deadline: deadline } });
+            {
+                $set: {
+                    total_locked: incBalance.balance.amount,
+                    pending_rewards: rewardsBalance.reward_pool_balance.balance,
+                    deadline: deadline.end_height.height
+                }
+            });
     });
 };
 
