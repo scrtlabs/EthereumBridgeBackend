@@ -24,9 +24,9 @@ const server = app.listen(app.get("port"), () => {
 });
 
 
-process.on('SIGINT', () => {
-    logger.info("Interrupted")
-    process.exit(0)
-})
+process.on("SIGINT", () => {
+    logger.info("Interrupted");
+    process.exit(0);
+});
 
 export default server;

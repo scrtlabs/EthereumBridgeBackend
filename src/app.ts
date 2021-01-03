@@ -16,6 +16,7 @@ const MongoStore = mongo(session);
 import * as swapController from "./controllers/swaps";
 import * as tokenController from "./controllers/tokens";
 import * as opController from "./controllers/operations";
+import * as rewardsController from "./controllers/rewards";
 
 import config from "./util/config";
 
@@ -86,5 +87,8 @@ app.get("/swaps/:swap", swapController.getSwapInfo);
 app.post("/operations/", opController.newOperation);
 app.post("/operations/:operation", opController.updateOperation);
 app.get("/operations/:operation", opController.getOperation);
+
+app.get("/rewards/", rewardsController.getRewardPools);
+app.get("/rewards/:pool", rewardsController.getPool);
 
 export default app;
