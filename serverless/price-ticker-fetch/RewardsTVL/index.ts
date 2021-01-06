@@ -4,11 +4,16 @@
 import { AzureFunction, Context } from "@azure/functions";
 import { MongoClient } from "mongodb";
 import { CosmWasmClient, EnigmaUtils } from "secretjs";
+import fetch from "node-fetch";
+
+const coinGeckoApi = "https://api.coingecko.com/api/v3/simple/price?";
 
 interface Token {
     symbol: string;
     address: string;
     decimals: number;
+    name: string;
+    price: number;
 }
 
 interface RewardPoolData {
@@ -59,20 +64,36 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         const incTokenAddr = pool.inc_token.address;
 
         // Query chain for things needed to be updated
-        let rewardsBalance, incBalance, deadline;
+        let rewardsBalance, incBalance, deadline, incTokenPrice, rewardTokenPrice;
         const queries = [
             queryClient.queryContractSmart(poolAddr, queryRewardPool()),
             queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`)),
-            queryClient.queryContractSmart(poolAddr, queryDeadline())
+            queryClient.queryContractSmart(poolAddr, queryDeadline()),
+            (await fetch(coinGeckoApi + new URLSearchParams({
+                vs_currencies: "usd",
+                ids: pool.inc_token.name
+            }))).json(),
+            (await fetch(coinGeckoApi + new URLSearchParams({
+                vs_currencies: "usd",
+                ids: pool.rewards_token.name
+            }))).json()
+
         ];
-        [rewardsBalance, incBalance, deadline] = await Promise.all(queries);
+        [rewardsBalance, incBalance, deadline, incTokenPrice, rewardTokenPrice] = await Promise.all(queries);
+
+        console.log(incTokenPrice[pool.inc_token.name].usd);
+        console.log(rewardTokenPrice[pool.rewards_token.name].usd);
+
+
 
         db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
             {
                 $set: {
                     total_locked: incBalance.balance.amount,
                     pending_rewards: rewardsBalance.reward_pool_balance.balance,
-                    deadline: deadline.end_height.height
+                    deadline: deadline.end_height.height,
+                    "inc_token.price": incTokenPrice[pool.inc_token.name].usd,
+                    "rewards_token.price": rewardTokenPrice[pool.rewards_token.name].usd
                 }
             });
     });
