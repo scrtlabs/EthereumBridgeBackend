@@ -7,7 +7,7 @@ export const getAllSwaps = async (req: Request, res: Response) => {
     logger.debug('getAllSwaps');
     try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        const swaps = await Swap.find({}, {_id: false, unsigned_tx: false, sequence: false}).sort({ _id: -1 });
+        const swaps = await Swap.find({}, {_id: false, unsigned_tx: false, sequence: false}).sort({ _id: -1 }).limit(100);
         res.json( { swaps: swaps});
     } catch (e) {
         res.status(500);
