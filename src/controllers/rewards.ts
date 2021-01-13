@@ -21,13 +21,16 @@ export const getRewardPools = async (req: Request, res: Response) => {
 export const getPool = async (req: Request, res: Response) => {
     const poolAddr = req.params.pool;
     // eslint-disable-next-line @typescript-eslint/camelcase
-    const pools: RewardsDocument = await cache.get(poolAddr, async () => Rewards.findOne({pool_address: poolAddr}, {_id: false}));
+    const pool: RewardsDocument = await cache.get(poolAddr, async () => Rewards.findOne({pool_address: poolAddr}, {_id: false}));
 
-    try {
-        res.json( { pool: pools });
-    } catch (e) {
-        res.status(500);
-        res.send(`Error: ${e}`);
+    if (!pool) {
+        res.status(404);
+    } else {
+        try {
+            res.json( { pool: pool });
+        } catch (e) {
+            res.status(500);
+            res.send(`Error: ${e}`);
+        }
     }
-
 };
