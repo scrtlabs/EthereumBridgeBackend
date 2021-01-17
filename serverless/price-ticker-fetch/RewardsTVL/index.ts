@@ -47,56 +47,59 @@ function querySnip20Balance(address: string, key: string) {
 }
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
-    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
+    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
+        { useUnifiedTopology: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
         }
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
-    const pools = await db.collection("rewards_data").find({});
+    const pools: RewardPoolData[] = await db.collection("rewards_data").find({}).toArray().catch(
+        (err: any) => {
+            context.log(err);
+            throw new Error("Failed to get rewards from collection");
+        });
 
     const seed = EnigmaUtils.GenerateNewSeed();
     const queryClient = new CosmWasmClient(`${process.env["secretNodeURL"]}`, seed);
+    await Promise.all(
+        pools.map(async pool => {
+            const poolAddr = pool.pool_address;
+            const incTokenAddr = pool.inc_token.address;
 
-    pools.forEach(async (pool: RewardPoolData) => {
-        const poolAddr = pool.pool_address;
-        const incTokenAddr = pool.inc_token.address;
+            // Query chain for things needed to be updated
+            const [rewardsBalance, incBalance, deadline, incTokenPrice, rewardTokenPrice] = await Promise.all([
+                queryClient.queryContractSmart(poolAddr, queryRewardPool()),
+                queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`)),
+                queryClient.queryContractSmart(poolAddr, queryDeadline()),
+                (await fetch(coinGeckoApi + new URLSearchParams({
+                    vs_currencies: "usd",
+                    ids: pool.inc_token.name
+                }))).json(),
+                (await fetch(coinGeckoApi + new URLSearchParams({
+                    vs_currencies: "usd",
+                    ids: pool.rewards_token.name
+                }))).json()
 
-        // Query chain for things needed to be updated
-        let rewardsBalance, incBalance, deadline, incTokenPrice, rewardTokenPrice;
-        const queries = [
-            queryClient.queryContractSmart(poolAddr, queryRewardPool()),
-            queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`)),
-            queryClient.queryContractSmart(poolAddr, queryDeadline()),
-            (await fetch(coinGeckoApi + new URLSearchParams({
-                vs_currencies: "usd",
-                ids: pool.inc_token.name
-            }))).json(),
-            (await fetch(coinGeckoApi + new URLSearchParams({
-                vs_currencies: "usd",
-                ids: pool.rewards_token.name
-            }))).json()
+            ]);
 
-        ];
-        [rewardsBalance, incBalance, deadline, incTokenPrice, rewardTokenPrice] = await Promise.all(queries);
-
-        console.log(incTokenPrice[pool.inc_token.name].usd);
-        console.log(rewardTokenPrice[pool.rewards_token.name].usd);
-
-
-
-        db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
-            {
-                $set: {
-                    total_locked: incBalance.balance.amount,
-                    pending_rewards: rewardsBalance.reward_pool_balance.balance,
-                    deadline: deadline.end_height.height,
-                    "inc_token.price": incTokenPrice[pool.inc_token.name].usd,
-                    "rewards_token.price": rewardTokenPrice[pool.rewards_token.name].usd
-                }
-            });
-    });
+            await db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
+                {
+                    $set: {
+                        total_locked: incBalance.balance.amount,
+                        pending_rewards: rewardsBalance.reward_pool_balance.balance,
+                        deadline: deadline.end_height.height,
+                        "inc_token.price": incTokenPrice[pool.inc_token.name].usd,
+                        "rewards_token.price": rewardTokenPrice[pool.rewards_token.name].usd
+                    }
+                });
+        })
+    ).catch(
+        err => {
+            context.log(`Failed update rewards stats: ${err}`)
+        }
+    )
 };
 
 export default timerTrigger;

@@ -86,7 +86,8 @@ interface LockedResult {
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
+    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
+        { useUnifiedTopology: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
@@ -94,13 +95,13 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
-    const tokens = await db.collection("token_pairing").find({}).limit(20).toArray().catch(
+    const tokens = await db.collection("token_pairing").find({}).limit(30).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
         }
     );
-    context.log(tokens);
+    //context.log(tokens);
 
     const balances: LockedResult[] = await Promise.all<LockedResult>(
         tokens.map(async (token): Promise<LockedResult> => {
@@ -123,7 +124,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             throw new Error("Failed to fetch balance");
     });
 
-    context.log(balances);
+    //context.log(balances);
 
     await Promise.all(
         balances.map(async b => {
