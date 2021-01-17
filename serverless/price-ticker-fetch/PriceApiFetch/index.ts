@@ -134,14 +134,14 @@ const oracles: PriceOracle[] = [new BinancePriceOracle, new CoinGeckoOracle];
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    const client: MongoClient = await MongoClient.connect(`mongodb+srv://leader:6FXQ3gHXQQAkbpmI@cluster0.dka2m.mongodb.net/reuven-bridge-test-1?retryWrites=true&w=majority`,
+    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
         { useUnifiedTopology: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
         }
     );
-    const db = await client.db(`reuven-bridge-test-1`);
+    const db = await client.db(`${process.env["mongodbName"]}`);
 
     const tokens = await db.collection("token_pairing").find({}).limit(31).toArray().catch(
         (err: any) => {
