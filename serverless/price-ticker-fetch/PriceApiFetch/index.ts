@@ -9,12 +9,6 @@ interface PriceOracle {
     getPrices: (symbols: string[]) => Promise<PriceResult[]>;
 }
 
-const multiplier = 1e18;
-
-const convertToUint128 = (price: string): string => {
-    return BigInt(parseFloat(price) * multiplier).toString();
-};
-
 const priceRelativeToUSD = (priceBTC: string, priceRelative: string): string => {
     return String(parseFloat(priceBTC) * parseFloat(priceRelative));
 };
@@ -30,18 +24,18 @@ class BinancePriceOracle implements PriceOracle {
             symbols.map(async (symbol): Promise<PriceResult> => {
 
                 if (symbol === "USDT") {
-                    return {symbol: "USDT", price: convertToUint128("1.000")};
+                    return {symbol: "USDT", price: "1.000"};
                 }
 
                 if (symbol === "BTC") {
-                    return {symbol: "BTC", price: convertToUint128(priceBTC.price)};
+                    return {symbol: "BTC", price: priceBTC.price};
                 }
 
                 const priceRelative = await fetch(binanceUrl + new URLSearchParams({
                     symbol: `${symbol}BTC`,
                 })).catch(
                     (err) => {
-                        console.log(`symbol doesn't exist: ${err}`);
+                        //console.log(`symbol doesn't exist: ${err}`);
                         return undefined;
                     }
                 );
@@ -50,12 +44,11 @@ class BinancePriceOracle implements PriceOracle {
 
                 return {
                     symbol: symbol,
-                    price: convertToUint128(priceRelativeToUSD(priceBTC.price, resultRelative.price))
+                    price: priceRelativeToUSD(priceBTC.price, resultRelative.price)
                 };
             })).catch(
             (err) => {
-                console.log(err);
-                throw new Error("Failed to fetch price");
+                throw new Error(`Binance oracle failed to fetch price: ${err}`);
             });
     }
 }
@@ -93,29 +86,40 @@ class CoinGeckoOracle implements PriceOracle {
             symbols.map(async (symbol): Promise<PriceResult> => {
 
                 const coinGeckoID = this.symbolToID(symbol);
+                if (!coinGeckoID) {
+                    return {
+                        symbol,
+                        price: undefined
+                    };
+                }
 
                 const priceRelative = await fetch(coinGeckoUrl + new URLSearchParams({
                     ids: coinGeckoID,
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     vs_currencies: "USD"
                 })).catch(
-                    (err) => {
-                        console.log(`symbol doesn't exist: ${err}`);
-                        return undefined;
+                    (_) => {
+                        return {
+                            symbol,
+                            price: undefined
+                        };
                     }
                 );
 
-                const resultRelative = (await priceRelative.json())[coinGeckoID].usd;
-
-                return {
-                    symbol: symbol,
-                    price: convertToUint128(resultRelative)
-                };
+                const asJson = await priceRelative.json();
+                try {
+                    const resultRelative = asJson[coinGeckoID].usd;
+                    return {
+                        symbol: symbol,
+                        price: resultRelative
+                    };
+                } catch {
+                    throw new Error(`Failed to parse response for token: ${symbol}. id: ${coinGeckoID}, response: ${asJson}`);
+                }
 
             })).catch(
             (err) => {
-                console.log(err);
-                throw new Error("Failed to fetch price");
+                throw new Error(`Coingecko oracle failed to fetch price: ${err}`);
             });
     }
 }
@@ -130,21 +134,22 @@ const oracles: PriceOracle[] = [new BinancePriceOracle, new CoinGeckoOracle];
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
+    const client: MongoClient = await MongoClient.connect(`mongodb+srv://leader:6FXQ3gHXQQAkbpmI@cluster0.dka2m.mongodb.net/reuven-bridge-test-1?retryWrites=true&w=majority`,
+        { useUnifiedTopology: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
         }
     );
-    const db = await client.db(`${process.env["mongodbName"]}`);
+    const db = await client.db(`reuven-bridge-test-1`);
 
-    const tokens = await db.collection("token_pairing").find({}).limit(20).toArray().catch(
+    const tokens = await db.collection("token_pairing").find({}).limit(31).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
         }
     );
-    context.log(tokens);
+    //context.log(tokens);
 
     let symbols;
 
@@ -156,39 +161,37 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     }
 
     let prices: PriceResult[][] = await Promise.all(oracles.map(
-        o => o.getPrices(symbols)
+        async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
     ));
 
-    // const prices: PriceResult[] = await Promise.all<PriceResult>(
-    //     symbols.map(async (symbol): Promise<PriceResult> => {
-    //
-    //         if (symbol === "USDT") {
-    //             return {symbol: "USDT", price: "1.000"};
-    //         }
-    //
-    //         if (symbol === "WBTC") {
-    //             const price = await fetch(binanceUrl + new URLSearchParams({
-    //                 symbol: "BTCUSDT",
-    //             }));
-    //             const result = await price.json();
-    //             return {symbol: symbol, price: result.price};
-    //         }
-    //
-    //         const price = await fetch(binanceUrl + new URLSearchParams({
-    //             symbol: `${symbol}USDT`,
-    //         }));
-    //         const result = await price.json();
-    //         return {symbol: symbol, price: result.price};
-    // })).catch(
-    //     (err) => {
-    //         context.log(err);
-    //         throw new Error("Failed to fetch price");
-    // });
+    let average_prices: PriceResult[] = [];
+    //context.log(prices);
 
-    context.log(prices);
+    for (const symbol of symbols) {
+
+        let total = 0;
+        let length = 0;
+        prices.forEach((priceOracleResponse: PriceResult[]) => {
+
+            priceOracleResponse.forEach((price: PriceResult) => {
+                if (symbol === price.symbol){
+                    total += parseFloat(price.price);
+                    length++;
+                }
+            });
+        });
+        average_prices.push({
+            symbol,
+            price: (total / length).toFixed(4),
+        });
+
+    }
+
+
+    //context.log(average_prices);
 
     await Promise.all(
-        prices.map(async p => {
+        average_prices.map(async p => {
             await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
         })).catch(
         (err) => {

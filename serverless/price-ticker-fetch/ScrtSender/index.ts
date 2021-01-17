@@ -110,7 +110,8 @@ const getNewSwapAddresses = async (address: string, fromBlock: number, toBlock: 
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`).catch(
+    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
+        { useUnifiedTopology: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
@@ -118,13 +119,13 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
-    const fromBlock: number = await db.collection("swap_tracker_object").findOne({src: "scrt_sender"}).catch(
+    const fromBlock: number = await db.collection("swap_tracker_object").findOne({src: "scrt_sender"}).then(
+        value => value.nonce
+    ).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get start value from swap tracker");
         }
-    ).then(
-        value => value.nonce
     );
 
     const currentBlock = await w3.eth.getBlockNumber();
