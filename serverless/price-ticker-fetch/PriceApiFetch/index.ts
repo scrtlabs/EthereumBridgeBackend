@@ -67,8 +67,8 @@ class CoinGeckoOracle implements PriceOracle {
         "WBTC": "wrapped-bitcoin",
         "UNI": "uniswap",
         "AAVE": "aave",
-        "COMP": "compound",
-        "SNX": "synthetix-network-token",
+        "COMP": "compound-governance-token",
+        "SNX": "havven",
         "TUSD": "true-usd",
         "BAND": "band-protocol",
         "BAC": "basis-cash",
@@ -111,10 +111,10 @@ class CoinGeckoOracle implements PriceOracle {
                     const resultRelative = asJson[coinGeckoID].usd;
                     return {
                         symbol: symbol,
-                        price: resultRelative
+                        price: String(resultRelative)
                     };
                 } catch {
-                    throw new Error(`Failed to parse response for token: ${symbol}. id: ${coinGeckoID}, response: ${asJson}`);
+                    throw new Error(`Failed to parse response for token: ${symbol}. id: ${coinGeckoID}, response: ${JSON.stringify(asJson)}`);
                 }
 
             })).catch(
@@ -130,7 +130,8 @@ interface PriceResult {
     symbol: string;
 }
 
-const oracles: PriceOracle[] = [new BinancePriceOracle, new CoinGeckoOracle];
+// disabling new BinancePriceOracle till we figure out the DAI stuff
+const oracles: PriceOracle[] = [new CoinGeckoOracle];
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
@@ -165,7 +166,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     ));
 
     let average_prices: PriceResult[] = [];
-    //context.log(prices);
+    context.log(prices);
 
     for (const symbol of symbols) {
 
@@ -180,6 +181,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 }
             });
         });
+        context.log(`${symbol} - ${total}:${length}`);
         average_prices.push({
             symbol,
             price: (total / length).toFixed(4),
@@ -188,7 +190,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     }
 
 
-    //context.log(average_prices);
+    context.log(average_prices);
 
     await Promise.all(
         average_prices.map(async p => {
