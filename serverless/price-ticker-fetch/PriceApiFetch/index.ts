@@ -73,7 +73,13 @@ class CoinGeckoOracle implements PriceOracle {
         "BAND": "band-protocol",
         "BAC": "basis-cash",
         "MKR": "maker",
-        "KNC": "kyber-network"
+        "KNC": "kyber-network",
+        "DPI": "defipulse-index",
+        "RSR": "reserve-rights-token",
+        "REN": "republic-protocol",
+        "RENBTC": "renbtc",
+        "USDC": "usd-coin",
+        "SUSHI": "sushi",
     }
 
     symbolToID = symbol => {
