@@ -58,6 +58,7 @@ class CoinGeckoOracle implements PriceOracle {
     symbolMap = {
         "BTC": "bitcoin",
         "SCRT": "secret",
+        "SSCRT": "secret",
         "ETH": "ethereum",
         "OCEAN": "ocean-protocol",
         "USDT": "tether",
