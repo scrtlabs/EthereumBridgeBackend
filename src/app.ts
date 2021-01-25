@@ -1,9 +1,9 @@
 import express from "express";
 import compression from "compression";  // compresses requests
-import session from "express-session";
+//import session from "express-session";
 import bodyParser from "body-parser";
 import lusca from "lusca";
-import mongo from "connect-mongo";
+//import mongo from "connect-mongo";
 import mongoose from "mongoose";
 
 import cors from "cors";
@@ -11,7 +11,7 @@ import cors from "cors";
 import bluebird from "bluebird";
 import { SESSION_SECRET } from "./util/secrets";
 import logger from "./util/logger";
-const MongoStore = mongo(session);
+//const MongoStore = mongo(session);
 
 import * as swapController from "./controllers/swaps";
 import * as tokenController from "./controllers/tokens";
@@ -65,15 +65,15 @@ app.set("port", config.port || 8000);
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-    resave: true,
-    saveUninitialized: true,
-    secret: SESSION_SECRET,
-    store: new MongoStore({
-        mongooseConnection: mongoose.connection,
-        autoReconnect: true
-    })
-}));
+// app.use(session({
+//     resave: true,
+//     saveUninitialized: true,
+//     secret: SESSION_SECRET,
+//     store: new MongoStore({
+//         mongooseConnection: mongoose.connection,
+//         autoReconnect: true
+//     })
+// }));
 
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
