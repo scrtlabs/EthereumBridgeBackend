@@ -59,6 +59,20 @@ const erc20ABI = [
         ],
         payable: false,
         type: "function" as "function"
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: "totalSupply",
+        outputs: [
+            {
+                internalType: "uint256",
+                name: "",
+                type: "uint256"
+            }
+        ],
+        payable: false,
+        type: "function" as "function"
     }
 ];
 
@@ -66,6 +80,14 @@ const w3 = new Web3(process.env["EthProvider"]);
 
 const getEthBalance = async (address: string): Promise<string> => {
     return await w3.eth.getBalance(address);
+};
+
+const getErcSupply = async (token: string): Promise<string> => {
+    const contract = new w3.eth.Contract(erc20ABI, token);
+
+    const result = await contract.methods.totalSupply().call();
+
+    return w3.utils.toBN(result).toString();
 };
 
 const getErcBalance = async (address: string, token: string): Promise<string> => {
@@ -106,14 +128,16 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     const balances: LockedResult[] = await Promise.all<LockedResult>(
         tokens.map(async (token): Promise<LockedResult> => {
 
+            let balance;
             if (token.src_address === "native") {
-                const balance = await getEthBalance(process.env["MultisigAddress"]);
-                const balanceNormal = Number(balance) / Math.pow(10, Number(token.decimals));
-                const balanceUSD = balanceNormal * Number(token.price);
-                return {address: token.src_address, balance, balanceNormal, balanceUSD};
+                balance = await getEthBalance(process.env["MultisigAddress"]);
+            }
+            else if (token.src_coin === "WSCRT") {
+                balance = await getErcSupply(token.src_address);
+            } else {
+                balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
             }
 
-            const balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
             const balanceNormal = Number(balance) / Math.pow(10, Number(token.decimals));
             const balanceUSD = balanceNormal * Number(token.price);
 
