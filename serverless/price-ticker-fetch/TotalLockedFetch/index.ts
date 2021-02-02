@@ -1,6 +1,7 @@
 import { AzureFunction, Context } from "@azure/functions";
 import { MongoClient } from "mongodb";
 import Web3 from "web3";
+import fetch from "node-fetch";
 
 const erc20ABI = [
     {
@@ -99,11 +100,90 @@ const getErcBalance = async (address: string, token: string): Promise<string> =>
     return w3.utils.toBN(result).toString();
 };
 
+
+const uniABI = [
+    {
+        constant: true,
+        inputs: [],
+        name: "price0CumulativeLast",
+        outputs: [{ name: "", type: "uint" }],
+        payable: false,
+        type: "function" as "function"
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: "price1CumulativeLast",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        type: "function" as "function"
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: "totalSupply",
+        outputs: [{ name: "", type: "uint256" }],
+        payable: false,
+        type: "function" as "function"
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: "getReserves",
+        outputs: [
+            { name: "reserve0", type: "uint112" },
+            { name: "reserve1", type: "uint112" },
+            { name: "blockTimestampLast", type: "uint32" }],
+        payable: false,
+        type: "function" as "function"
+    }
+]
+
+const uniLPPrefix = 'UNILP'
+const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
+
+const ethPrice = async (): Promise<string> => {
+    const price = await fetch(coinGeckoUrl + new URLSearchParams({
+        ids: "ethereum",
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        vs_currencies: "USD"
+    }));
+    return (await price.json())["ethereum"].usd
+}
+
+// this only works for ETH pairs... todo: generalize it when we want to reward other pools
+const getUniPrice = async (address: string) => {
+
+    const contract = new w3.eth.Contract(uniABI, address);
+
+    const totalSupply = await contract.methods.totalSupply().call();
+
+    const priceETH = Number(await ethPrice());
+    const res = await contract.methods.getReserves().call();
+
+    const price = res["1"] * priceETH * 2 / totalSupply
+
+    //console.log(`${JSON.stringify(res)}, ${totalSupply}`)
+
+    return price.toString();
+}
+
+
 interface LockedResult {
     balance: string;
     balanceNormal: number;
     balanceUSD: number;
     address: string;
+}
+
+const updateDbPrice = async (db, address, price) => {
+    await db.collection("token_pairing").updateOne(
+        {"src_address": address},
+        { $set: { price: price } }
+        ).catch(
+            (err) => {
+                throw new Error(`Failed to update price: ${err}`);
+            });
 }
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
@@ -134,7 +214,14 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             }
             else if (token.src_coin === "WSCRT") {
                 balance = await getErcSupply(token.src_address);
-            } else {
+            } else if (token.display_props.symbol.startsWith(uniLPPrefix)) {
+                // uni price updates from here
+                balance = await getErcSupply(token.src_address);
+                token.price = await getUniPrice(token.src_address);
+                await updateDbPrice(db, token.src_address, token.price);
+            }
+
+            else {
                 balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
             }
 

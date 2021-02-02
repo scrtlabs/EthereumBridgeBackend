@@ -140,6 +140,8 @@ interface PriceResult {
 // disabling new BinancePriceOracle till we figure out the DAI stuff
 const oracles: PriceOracle[] = [new CoinGeckoOracle];
 
+const uniLPPrefix = 'UNILP'
+
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
     const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
@@ -162,7 +164,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     let symbols;
 
     try {
-         symbols = tokens.map(t => t.display_props.symbol);
+         symbols = tokens
+             .map(t => t.display_props.symbol)
+             .filter(t => !t.startsWith(uniLPPrefix));
     } catch (e) {
         context.log(e);
         throw new Error("Failed to get symbol for token");
