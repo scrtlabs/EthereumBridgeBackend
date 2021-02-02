@@ -216,7 +216,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 balance = await getErcSupply(token.src_address);
             } else if (token.display_props.symbol.startsWith(uniLPPrefix)) {
                 // uni price updates from here
-                balance = await getErcSupply(token.src_address);
+                balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
                 token.price = await getUniPrice(token.src_address);
                 await updateDbPrice(db, token.src_address, token.price);
             }
