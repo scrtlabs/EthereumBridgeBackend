@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json.schemastore.org/proxies",
+  "proxies": {
+    "RpcProxy": {
+      "matchCondition": {
+        "methods": [ "GET", "POST" ],
+        "route": "/secret-2/rpc/{*request}"
+      },
+      "requestOverrides": {
+        "backend.request.headers.Accept": "application/json",
+        "backend.request.headers.Authorization": "%DATAHUB_API_KEY%"
+      },
+      "backendUri": "https://%RPC_HOST%/{request}"
+    },
+    "LcdProxy": {
+      "matchCondition": {
+        "methods": [ "GET", "POST" ],
+        "route": "/secret-2/lcd/{*request}"
+      },
+      "requestOverrides": {
+        "backend.request.headers.Accept": "application/json",
+        "backend.request.headers.Authorization": "%DATAHUB_API_KEY%"
+      },
+      "backendUri": "https://%LCD_HOST%/{request}"
+    },
+    "RpcProxyTestnet": {
+      "matchCondition": {
+        "methods": [ "GET", "POST" ],
+        "route": "/holodeck-2/rpc/{*request}"
+      },
+      "requestOverrides": {
+        "backend.request.headers.Accept": "application/json",
+        "backend.request.headers.Authorization": "%TESTNET_DATAHUB_API_KEY%"
+      },
+      "backendUri": "https://%TESTNET_RPC_HOST%/{request}"
+    },
+    "LcdProxyTestnet": {
+      "matchCondition": {
+        "methods": [ "GET", "POST" ],
+        "route": "/holodeck-2/lcd/{*request}"
+      },
+      "requestOverrides": {
+        "backend.request.headers.Accept": "application/json",
+        "backend.request.headers.Authorization": "%TESTNET_DATAHUB_API_KEY%"
+      },
+      "backendUri": "https://%TESTNET_LCD_HOST%/{request}"
+    }
+  }
+}
