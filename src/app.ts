@@ -1,5 +1,5 @@
 import express from "express";
-import compression from "compression";  // compresses requests
+import compression from "compression"; // compresses requests
 //import session from "express-session";
 import bodyParser from "body-parser";
 import lusca from "lusca";
@@ -17,6 +17,7 @@ import * as swapController from "./controllers/swaps";
 import * as tokenController from "./controllers/tokens";
 import * as opController from "./controllers/operations";
 import * as rewardsController from "./controllers/rewards";
+import * as secretSwapPairsController from "./controllers/secretswap_pairs";
 
 import config from "./util/config";
 
@@ -29,24 +30,30 @@ const app = express();
 mongoose.Promise = bluebird;
 
 const mongoUrl = config.db;
-mongoose.connect(mongoUrl, {
+mongoose
+  .connect(mongoUrl, {
     dbName: config.dbName,
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
     user: config.dbUser,
-    pass: config.dbPass,} ).then(
-    () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-).catch(err => {
-    logger.error("MongoDB connection error. Please make sure MongoDB is running. " + err);
+    pass: config.dbPass,
+  })
+  .then(() => {
+    /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
+  })
+  .catch((err) => {
+    logger.error(
+      "MongoDB connection error. Please make sure MongoDB is running. " + err
+    );
     process.exit();
-});
+  });
 
-app.use(cors(
-    {
-       origin: config.appUrl
-    }
-));
+app.use(
+  cors({
+    origin: config.appUrl,
+  })
+);
 
 // const whitelist = [process.env.APP_URL]
 // const corsOptions = {
@@ -90,5 +97,7 @@ app.get("/operations/:operation", opController.getOperation);
 
 app.get("/rewards/", rewardsController.getRewardPools);
 app.get("/rewards/:pool", rewardsController.getPool);
+
+app.get("/secretswap_pairs/", secretSwapPairsController.getSecretSwapPairs);
 
 export default app;
