@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json.schemastore.org/proxies",
+  "proxies": {
+    "LcdProxy": {
+      "matchCondition": {
+        "methods": [ "GET", "POST", "HEAD" ],
+        "route": "/{*request}"
+      },
+      "requestOverrides": {
+        "backend.request.headers.Accept": "application/json",
+        "backend.request.headers.Authorization": "%DATAHUB_API_KEY%"
+      },
+      "backendUri": "https://%LCD_HOST%/{request}"
+    }
+  }
+}
