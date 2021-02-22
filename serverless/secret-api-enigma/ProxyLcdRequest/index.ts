@@ -10,10 +10,12 @@ const forwardURL = `${process.env["forwardURL"]}`
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     let route = context.bindingData.route;
-    const response = await fetch(`${forwardURL}/${route}`, {
+
+    const url = req.query ? `${forwardURL}/${route}?` + new URLSearchParams(req.query) : `${forwardURL}/${route}`;
+
+    const response = await fetch(url, {
         method: req.method,
         headers: req.headers,
-        query: req.query,
         body: req.body,
         agent: httpsAgent
     });
