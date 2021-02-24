@@ -29,27 +29,27 @@ export interface SecretSwapPairDocument extends mongoose.Document {
 
 export const secretSwapPairSchema = new mongoose.Schema(
   {
-    asset_infos: [
-      {
-        token: {
-          contract_addr: String,
-          token_code_hash: String,
-          viewing_key: String,
-        },
-        native_token: {
-          denom: String,
-        },
-      },
-    ],
-    contract_addr: String,
-    liquidity_token: String,
-    token_code_hash: String,
-    asset0_volume: String,
-    asset1_volume: String,
-    factory: {
-      address: String,
-      code_hash: String,
-    },
+    // asset_infos: [
+    //   {
+    //     token: {
+    //       contract_addr: String,
+    //       token_code_hash: String,
+    //       viewing_key: String,
+    //     },
+    //     native_token: {
+    //       denom: String,
+    //     },
+    //   },
+    // ],
+    // contract_addr: String,
+    // liquidity_token: String,
+    // token_code_hash: String,
+    // asset0_volume: String,
+    // asset1_volume: String,
+    // factory: {
+    //   address: String,
+    //   code_hash: String,
+    // },
   },
   { collection: "secretswap_pairs" }
 );
