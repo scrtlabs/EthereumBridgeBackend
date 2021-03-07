@@ -3,7 +3,7 @@
   "proxies": {
     "LcdProxy": {
       "matchCondition": {
-        "methods": [ "GET", "POST", "HEAD" ],
+        "methods": [ "GET", "POST", "HEAD", "OPTIONS" ],
         "route": "/{*request}"
       },
       "requestOverrides": {

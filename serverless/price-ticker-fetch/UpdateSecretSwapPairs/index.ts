@@ -12,9 +12,15 @@ const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
 ): Promise<void> {
-  const dbClient = await MongoClient.connect(mongodbUrl);
+  const client: MongoClient = await MongoClient.connect(mongodbUrl,
+      { useUnifiedTopology: true }).catch(
+      (err: any) => {
+        context.log(err);
+        throw new Error("Failed to connect to database");
+      }
+  );
 
-  const dbCollection = dbClient.db(mongodbName).collection("secretswap_pairs");
+  const dbCollection = client.db(mongodbName).collection("secretswap_pairs");
   const pairsInDb = new Set(
     (await (await dbCollection.find()).toArray()).map((p) => p._id)
   );
