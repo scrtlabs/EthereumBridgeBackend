@@ -102,4 +102,7 @@ app.get("/secretswap_pairs/", secretSwapPairsController.getSecretSwapPairs);
 
 app.get("/signer_health/", signerHealthController.getSignerHealth);
 
+app.get("/sushi_pool", secretSwapPairsController.getSushiPool);
+
+
 export default app;

@@ -5,6 +5,8 @@ import {
   SecretSwapPairDocument,
 } from "../models/SecretSwapPair";
 
+import sushiData from '@sushiswap/sushi-data';
+
 const cache = Cache.getInstance();
 
 // import {check, validationResult} from "express-validator";
@@ -22,6 +24,19 @@ export const getSecretSwapPairs = async (req: Request, res: Response) => {
         res.send(`Error: ${e}`);
     }
 
+};
+
+export const getSushiPool = async (req: Request, res: Response) => {
+    const address: string = req.params.address;
+
+    sushiData.masterchef.pool({ pool_address: address, pool_id: undefined }).then(pool => {
+        try {
+            res.json(pool);
+        } catch (e) {
+            res.status(500);
+            res.send(`Error: ${e}`);
+        }
+    })
 };
 
 // export const getToken = async (req: Request, res: Response) => {
