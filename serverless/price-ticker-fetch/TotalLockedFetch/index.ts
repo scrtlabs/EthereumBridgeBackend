@@ -149,7 +149,7 @@ const ethPrice = async (): Promise<string> => {
         vs_currencies: "USD"
     }));
     return (await price.json())["ethereum"].usd
-}
+};
 
 // this only works for ETH pairs... todo: generalize it when we want to reward other pools
 const getUniPrice = async (address: string) => {
@@ -161,12 +161,12 @@ const getUniPrice = async (address: string) => {
     const priceETH = Number(await ethPrice());
     const res = await contract.methods.getReserves().call();
 
-    const price = res["1"] * priceETH * 2 / totalSupply
+    const price = res["1"] * priceETH * 2 / totalSupply;
 
     //console.log(`${JSON.stringify(res)}, ${totalSupply}`)
 
     return price.toString();
-}
+};
 
 
 interface LockedResult {
@@ -189,7 +189,7 @@ const updateDbPrice = async (db, address, price) => {
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
     const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
-        { useUnifiedTopology: true }).catch(
+        { useUnifiedTopology: true, useNewUrlParser: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
@@ -226,7 +226,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             }
 
             const balanceNormal = Number(balance) / Math.pow(10, Number(token.decimals));
-            const balanceUSD = balanceNormal * Number(token.price);
+            const balanceUSD = balanceNormal === 0 ? 0 : balanceNormal * Number(token.price);
 
             return {address: token.src_address, balance, balanceNormal, balanceUSD};
     })).catch(

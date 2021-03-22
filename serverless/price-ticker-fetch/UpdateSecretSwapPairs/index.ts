@@ -13,7 +13,7 @@ const timerTrigger: AzureFunction = async function (
   myTimer: any
 ): Promise<void> {
   const client: MongoClient = await MongoClient.connect(mongodbUrl,
-      { useUnifiedTopology: true }).catch(
+      { useUnifiedTopology: true, useNewUrlParser: true }).catch(
       (err: any) => {
         context.log(err);
         throw new Error("Failed to connect to database");
