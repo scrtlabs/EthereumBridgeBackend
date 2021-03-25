@@ -197,7 +197,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
-    const tokens = await db.collection("token_pairing").find({}).limit(30).toArray().catch(
+    const tokens = await db.collection("token_pairing").find({}).limit(32).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
