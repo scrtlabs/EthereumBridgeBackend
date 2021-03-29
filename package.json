@@ -27,6 +27,7 @@
     },
     "dependencies": {
         "@azure/functions": "^1.2.2",
+        "@sushiswap/sushi-data": "^1.0.7",
         "agenda": "^3.1.0",
         "async": "^3.1.0",
         "bcrypt-nodejs": "^0.0.3",

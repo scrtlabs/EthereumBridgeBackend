@@ -20,6 +20,9 @@ FROM node:latest as build
 #
 FROM node:12.13.0-alpine
 
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh
+
 WORKDIR /app
 ENV NODE_ENV=production
 
