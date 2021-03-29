@@ -88,6 +88,8 @@ app.use(lusca.xssProtection(true));
 app.get("/tokens/", tokenController.getTokenPairings);
 app.get("/tokens/:token", tokenController.getToken);
 
+app.get("/secret_tokens/", tokenController.getSecretTokens);
+
 app.get("/swaps/", swapController.getAllSwaps);
 app.get("/swaps/:swap", swapController.getSwapInfo);
 
@@ -101,5 +103,9 @@ app.get("/rewards/:pool", rewardsController.getPool);
 app.get("/secretswap_pairs/", secretSwapPairsController.getSecretSwapPairs);
 
 app.get("/signer_health/", signerHealthController.getSignerHealth);
+
+//app.get("/sushi_pool", secretSwapPairsController.getSushiPool);
+
+
 
 export default app;
