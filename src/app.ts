@@ -19,6 +19,7 @@ import * as opController from "./controllers/operations";
 import * as rewardsController from "./controllers/rewards";
 import * as secretSwapPairsController from "./controllers/secretswap_pairs";
 import * as signerHealthController from "./controllers/signer_health";
+import * as claimsController from "./controllers/claims";
 import config from "./util/config";
 
 // import Agenda from "agenda";
@@ -101,5 +102,8 @@ app.get("/rewards/:pool", rewardsController.getPool);
 app.get("/secretswap_pairs/", secretSwapPairsController.getSecretSwapPairs);
 
 app.get("/signer_health/", signerHealthController.getSignerHealth);
+
+app.get("/proof/eth/:addr", claimsController.getEthProof);
+app.get("/proof/scrt/:addr", claimsController.getScrtProof);
 
 export default app;
