@@ -18,7 +18,7 @@ const buildAssetInfo = (inputAmount: string, address: string, contractHash: stri
 };
 
 interface GenericSimulationResult {
-    returned_asset: string;
+    return_amount: string;
     commission_amount: string;
     spread_amount: string;
 }
@@ -49,6 +49,7 @@ const handleSimulation = async (
     secretjs: SigningCosmWasmClient,
     input: {amount: string; address: string; contractHash: string},
     pair: string,
+    context?: any,
 ): Promise<GenericSimulationResult> => {
 
     const result: SimulationReponse = await SimulateResult({
@@ -59,11 +60,15 @@ const handleSimulation = async (
         throw new Error(`Failed to run simulation: ${err}`);
     });
 
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    const {returned_asset, commission_amount, spread_amount } = result;
+    if (context) {
+        context.log(`simulation result: ${JSON.stringify(result)}`);
+    }
 
     // eslint-disable-next-line @typescript-eslint/camelcase
-    return { returned_asset, spread_amount, commission_amount };
+    const {return_amount, commission_amount, spread_amount } = result;
+
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    return { return_amount, spread_amount, commission_amount };
 };
 
 export const GetContractCodeHash = async (params: {
@@ -78,14 +83,21 @@ export const GetContractCodeHash = async (params: {
 
 export const priceFromPoolInScrt = async (secretjs: SigningCosmWasmClient,
                                     address: string,
-                                    pair: string): Promise<number> => {
+                                    pair: string,
+                                    context?: any): Promise<number> => {
 
-    const inputAmount = "1000000";
+    const inputAmount = "10";
     const contractHash = await GetContractCodeHash({secretjs, address});
+
+    if (context) {
+        context.log(`got contract hash: ${contractHash}`);
+    }
+
     const input = {contractHash, address, amount: inputAmount};
 
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    const { returned_asset } = await handleSimulation(secretjs, input, pair);
 
-    return Number(returned_asset);
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    const { return_amount } = await handleSimulation(secretjs, input, pair, context);
+
+    return Number(return_amount) / 10;
 };

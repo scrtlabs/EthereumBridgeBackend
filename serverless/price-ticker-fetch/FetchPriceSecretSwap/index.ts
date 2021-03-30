@@ -7,7 +7,7 @@ import fetch from "node-fetch";
 const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
 
 interface PriceOracle {
-    getPrices: (symbols: string[]) => Promise<PriceResult[]>;
+    getPrices: (symbols: string[], context?: any) => Promise<PriceResult[]>;
 }
 
 const seed = Uint8Array.from([
@@ -21,6 +21,9 @@ const faucet = {
     mnemonic: `${process.env["faucetMnemonic"]}`,
     address: `${process.env["faucetAddress"]}`
 };
+
+const sefiAddress = `${process.env["sefiAddress"] || "secret12q2c5s5we5zn9pq43l0rlsygtql6646my0sqfm"}`;
+const sefiPairAddress = `${process.env["sefiPairAddress"] || "secret1l56ke78aj9jxr4wu64h4rm20cnqxevzpf6tmfc"}`;
 
 const getSecretJs = async (): Promise<SigningCosmWasmClient> => {
     const pen = await Secp256k1Pen.fromMnemonic(faucet.mnemonic);
@@ -60,23 +63,31 @@ const getScrtPrice = async (): Promise<number> => {
 class SecretSwapOracle implements PriceOracle {
 
     symbolMap = {
-        "SEFI": {address: "secret1sjdfajdfjasdfjasdjfasjdf", pair: ""},
+        "SEFI": {address: sefiAddress, pair: sefiPairAddress},
     }
 
     symbolToID = symbol => {
         return this.symbolMap[symbol.toUpperCase()];
     }
 
-    async getPrices(symbols: string[]): Promise<PriceResult[]> {
+    async getPrices(symbols: string[], context?: any): Promise<PriceResult[]> {
 
         const secretjs = await getSecretJs();
-
-        const priceScrt = await getScrtPrice();
+        let priceScrt;
+        try {
+            priceScrt = await getScrtPrice();
+            if (context) {
+                context.log(`scrt price: ${priceScrt}`);
+            }
+        } catch (e) {
+            throw new Error("failed to get scrt price from coingecko");
+        }
 
         return Promise.all<PriceResult>(
             symbols.map(async (symbol): Promise<PriceResult> => {
 
                 const swapAddress = this.symbolToID(symbol);
+                context.log(`Got swap address: ${JSON.stringify(swapAddress)}`);
                 if (!swapAddress) {
                     return {
                         symbol,
@@ -84,11 +95,11 @@ class SecretSwapOracle implements PriceOracle {
                     };
                 }
 
-                const priceRelative = await priceFromPoolInScrt(secretjs, swapAddress.address, swapAddress.pair);
-
+                const priceRelative = await priceFromPoolInScrt(secretjs, swapAddress.address, swapAddress.pair, context);
+                context.log(`Got relative price: ${JSON.stringify(priceRelative)}`);
                 return {
                     symbol: symbol,
-                    price: String(priceRelative / priceScrt)
+                    price: String(priceScrt / priceRelative)
                 };
 
             })).catch(
@@ -119,27 +130,31 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
-    const tokens = await db.collection("secret_tokens").find({}).limit(31).toArray().catch(
+    const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
         }
     );
-    //context.log(tokens);
+    context.log(tokens);
+
+    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI");
+
+    context.log(sefiTokens);
 
     let symbols;
-
+    //
     try {
-         symbols = tokens
-             .map(t => t.display_props.symbol)
-             .filter(t => t.startsWith("sefi"));
+         symbols = sefiTokens
+             .map(t => t.display_props.symbol);
+             //.filter(t => t.toLowerCase().startsWith("sefi"));
     } catch (e) {
         context.log(e);
         throw new Error("Failed to get symbol for token");
     }
-
+    context.log(`sefi token symbol: ${symbols}`);
     const prices: PriceResult[][] = await Promise.all(oracles.map(
-        async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
+        async o => (await o.getPrices(symbols, context)).filter(p => !isNaN(Number(p.price)))
     ));
 
     const averagePrices: PriceResult[] = [];
@@ -170,7 +185,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     await Promise.all(
         averagePrices.map(async p => {
-            await db.collection("secret_tokens").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
+            await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
         })).catch(
         (err) => {
             context.log(err);
