@@ -37,6 +37,9 @@ export const getOperation = async (req: Request, res: Response) => {
 export const newOperation = async (req: Request, res: Response) => {
 
     await check("id", "Generated ID cannot be empty").not().isEmpty().run(req);
+    await check("id", "Generated ID must be UUID").isUUID().run(req);
+    await check("transactionHash", "transactionHash cannot be empty").not().isEmpty().run(req);
+    await check("transactionHash", "TransactionHash malformed").isAlphanumeric().isLength({min: 1, max: 512}).run(req);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         logger.error(`Error: ${JSON.stringify(errors.array())}`);
@@ -46,7 +49,7 @@ export const newOperation = async (req: Request, res: Response) => {
     }
 
 
-    let operation = new Operation({
+    const operation = new Operation({
         id: req.body.id,
         status: SwapStatus.SWAP_WAIT_SEND
     });
@@ -60,8 +63,10 @@ export const newOperation = async (req: Request, res: Response) => {
 };
 
 export const updateOperation = async (req: Request, res: Response) => {
-
+    await check("id", "Generated ID cannot be empty").not().isEmpty().run(req);
+    await check("id", "Generated ID must be UUID").isUUID().run(req);
     await check("transactionHash", "transactionHash cannot be empty").not().isEmpty().run(req);
+    await check("transactionHash", "TransactionHash malformed").isAlphanumeric().isLength({min: 1, max: 512}).run(req);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         logger.error(`Error updating transaction: ${JSON.stringify(errors.array())}`);
