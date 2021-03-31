@@ -175,7 +175,8 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     try {
          symbols = tokens
              .map(t => t.display_props.symbol)
-             .filter(t => !t.startsWith(uniLPPrefix));
+             .filter(t => !t.startsWith(uniLPPrefix))
+             .filter(t => !t.startsWith("SEFI"));
     } catch (e) {
         context.log(e);
         throw new Error("Failed to get symbol for token");

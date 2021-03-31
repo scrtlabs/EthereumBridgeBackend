@@ -185,7 +185,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     await Promise.all(
         averagePrices.map(async p => {
-            await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
+            if (!isNaN(Number(p.price))) {
+                await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
+            }
         })).catch(
         (err) => {
             context.log(err);

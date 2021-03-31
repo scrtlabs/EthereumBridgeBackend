@@ -197,7 +197,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
-    const tokens = await db.collection("token_pairing").find({}).limit(32).toArray().catch(
+    const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
@@ -212,8 +212,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             if (token.src_address === "native") {
                 balance = await getEthBalance(process.env["MultisigAddress"]);
             }
-            else if (token.src_coin === "WSCRT") {
+            else if (token.src_coin === "WSCRT" || token.src_coin === "SEFI") {
                 balance = await getErcSupply(token.src_address);
+                context.log(`total supply for ${token.src_coin}: ${balance}`);
             } else if (token.display_props.symbol.startsWith(uniLPPrefix)) {
                 // uni price updates from here
                 balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
