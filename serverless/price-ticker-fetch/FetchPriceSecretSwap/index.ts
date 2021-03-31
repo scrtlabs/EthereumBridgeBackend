@@ -99,7 +99,7 @@ class SecretSwapOracle implements PriceOracle {
                 context.log(`Got relative price: ${JSON.stringify(priceRelative)}`);
                 return {
                     symbol: symbol,
-                    price: String(priceScrt / priceRelative)
+                    price: String(priceScrt * priceRelative)
                 };
 
             })).catch(

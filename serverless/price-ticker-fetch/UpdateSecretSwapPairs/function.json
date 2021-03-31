@@ -4,7 +4,7 @@
       "name": "myTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "*/30 * * * * *"
+      "schedule": "0 */5 * * * *"
     }
   ],
   "scriptFile": "../dist/UpdateSecretSwapPairs/index.js"
