@@ -18,6 +18,7 @@ import * as tokenController from "./controllers/tokens";
 import * as opController from "./controllers/operations";
 import * as rewardsController from "./controllers/rewards";
 import * as secretSwapPairsController from "./controllers/secretswap_pairs";
+import * as secretSwapPoolsController from "./controllers/secretswap_pools";
 import * as signerHealthController from "./controllers/signer_health";
 import config from "./util/config";
 
@@ -99,6 +100,7 @@ app.get("/rewards/", rewardsController.getRewardPools);
 app.get("/rewards/:pool", rewardsController.getPool);
 
 app.get("/secretswap_pairs/", secretSwapPairsController.getSecretSwapPairs);
+app.get("/secretswap_pools/", secretSwapPoolsController.getSecretSwapPools);
 
 app.get("/signer_health/", signerHealthController.getSignerHealth);
 

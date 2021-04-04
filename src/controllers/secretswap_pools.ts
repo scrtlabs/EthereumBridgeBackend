@@ -1,25 +1,25 @@
 import { Request, Response } from "express";
 import Cache from "../util/cache";
 import {
-  SecretSwapPairs,
-  SecretSwapPairDocument,
-} from "../models/SecretSwapPair";
+  SecretSwapPools,
+  SecretSwapPoolDocument,
+} from "../models/SecretSwapPool";
 
 const cache = Cache.getInstance();
 
 // import {check, validationResult} from "express-validator";
 // import logger from "../util/logger";
 
-export const getSecretSwapPairs = async (req: Request, res: Response) => {
-  const pairs: SecretSwapPairDocument[] = await cache.get(
-    "secretswap_pairs",
+export const getSecretSwapPools = async (req: Request, res: Response) => {
+  const pools: SecretSwapPoolDocument[] = await cache.get(
+    "secretswap_pools",
     async () => {
-      return SecretSwapPairs.find({}, { _id: false });
+      return SecretSwapPools.find({}, { _id: false });
     }
   );
 
   try {
-    res.json({ pairs: pairs });
+    res.json({ pools });
   } catch (e) {
     res.status(500);
     res.send(`Error: ${e}`);
