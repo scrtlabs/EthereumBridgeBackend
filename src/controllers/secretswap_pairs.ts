@@ -5,6 +5,8 @@ import {
   SecretSwapPairDocument,
 } from "../models/SecretSwapPair";
 
+//import sushiData from '@sushiswap/sushi-data';
+
 const cache = Cache.getInstance();
 
 // import {check, validationResult} from "express-validator";
@@ -26,15 +28,15 @@ export const getSecretSwapPairs = async (req: Request, res: Response) => {
   }
 };
 
-// export const getToken = async (req: Request, res: Response) => {
-//     const token: string = req.params.token;
-//     const pair: PairingDocument = await cache.get(token, async () => Pairing.find({src_coin: token}, {_id: false}));
-
-//     // eslint-disable-next-line @typescript-eslint/camelcase
-//     //const pair = await Pairing.findOne({src_coin: token});
-//     if (!pair) {
-//         res.status(404);
-//     } else {
-//         res.json({token: pair});
-//     }
+// export const getSushiPool = async (req: Request, res: Response) => {
+//     const address: string = req.params.address;
+//
+//     sushiData.masterchef.pool({ pool_address: address, pool_id: undefined }).then(pool => {
+//         try {
+//             res.json(pool);
+//         } catch (e) {
+//             res.status(500);
+//             res.send(`Error: ${e}`);
+//         }
+//     })
 // };

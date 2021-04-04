@@ -3,6 +3,7 @@ import {Pairing, PairingDocument} from "../models/Pairing";
 import Cache from "../util/cache";
 import config from "../util/config";
 import {getErcBalance, getEthBalance} from "../blockchain/eth";
+import {TokenDocument, Tokens} from "../models/Tokens";
 
 const cache = Cache.getInstance();
 
@@ -20,7 +21,6 @@ export const getTokenPairings = async (req: Request, res: Response) => {
         res.status(500);
         res.send(`Error: ${e}`);
     }
-
 };
 
 export const getToken = async (req: Request, res: Response) => {
@@ -36,3 +36,15 @@ export const getToken = async (req: Request, res: Response) => {
     }
 };
 
+export const getSecretTokens = async (req: Request, res: Response) => {
+    const tokens: TokenDocument[] = await cache.get("secret_tokens", async () => {
+        return Tokens.find({}, {_id: false});
+    });
+
+    try {
+        res.json( { tokens });
+    } catch (e) {
+        res.status(500);
+        res.send(`Error: ${e}`);
+    }
+};
