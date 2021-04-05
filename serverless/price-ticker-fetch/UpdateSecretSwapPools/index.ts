@@ -39,9 +39,7 @@ const timerTrigger: AzureFunction = async function (
               { upsert: true }
             )
         )
-        .then((res) => {
-          context.log(res);
-        })
+        .then((res) => {})
         .catch((error) => {
           context.log(error);
         })
