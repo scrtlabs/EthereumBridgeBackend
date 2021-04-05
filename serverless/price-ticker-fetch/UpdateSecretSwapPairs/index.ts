@@ -12,17 +12,17 @@ const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
 ): Promise<void> {
-  const client: MongoClient = await MongoClient.connect(mongodbUrl,
-      { useUnifiedTopology: true, useNewUrlParser: true }).catch(
-      (err: any) => {
-        context.log(err);
-        throw new Error("Failed to connect to database");
-      }
-  );
+  const client: MongoClient = await MongoClient.connect(mongodbUrl, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+  }).catch((err: any) => {
+    context.log(err);
+    throw new Error("Failed to connect to database");
+  });
 
   const dbCollection = client.db(mongodbName).collection("secretswap_pairs");
   const pairsInDb = new Set(
-    (await (await dbCollection.find()).toArray()).map((p) => p._id)
+    (await dbCollection.find().toArray()).map((p) => p._id)
   );
   const secretjs = new CosmWasmClient(secretNodeURL);
 
@@ -47,7 +47,7 @@ const timerTrigger: AzureFunction = async function (
     return p;
   });
 
-  const res = await dbCollection.insertMany(pairs);
+  const res = await dbCollection.insertMany(pairs, {});
   context.log(res);
 };
 
