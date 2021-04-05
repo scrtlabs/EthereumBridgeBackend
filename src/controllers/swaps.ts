@@ -26,7 +26,7 @@ export const getSwapInfo = async (req: Request, res: Response) => {
         res.json({swap: swap});
     } else if (operation) {
         swap = await Swap.findOne({src_tx_hash: operation.transactionHash});
-        res.json({swap: swap})
+        res.json({swap: swap});
     } else {
         res.status(404);
         res.send("Not found");

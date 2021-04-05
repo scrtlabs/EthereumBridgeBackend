@@ -1,4 +1,5 @@
 {
+  "scriptFile": "../dist/FetchPriceSecretSwap/index.js",
   "bindings": [
     {
       "name": "myTimer",
@@ -6,6 +7,5 @@
       "direction": "in",
       "schedule": "0 */5 * * * *"
     }
-  ],
-  "scriptFile": "../dist/RewardsTVL/index.js"
+  ]
 }

@@ -20,6 +20,7 @@ import * as rewardsController from "./controllers/rewards";
 import * as secretSwapPairsController from "./controllers/secretswap_pairs";
 import * as secretSwapPoolsController from "./controllers/secretswap_pools";
 import * as signerHealthController from "./controllers/signer_health";
+import * as claimsController from "./controllers/claims";
 import config from "./util/config";
 
 // import Agenda from "agenda";
@@ -106,8 +107,9 @@ app.get("/secretswap_pools/", secretSwapPoolsController.getSecretSwapPools);
 
 app.get("/signer_health/", signerHealthController.getSignerHealth);
 
+app.get("/proof/eth/:addr", claimsController.getEthProof);
+app.get("/proof/scrt/:addr", claimsController.getScrtProof);
 //app.get("/sushi_pool", secretSwapPairsController.getSushiPool);
-
 
 
 export default app;
