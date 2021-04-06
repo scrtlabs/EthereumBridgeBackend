@@ -4,7 +4,7 @@
       "name": "myTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "*/30 * * * * *"
+      "schedule": "*/45 * * * * *"
     }
   ],
   "scriptFile": "../dist/UpdateSecretSwapPools/index.js"
