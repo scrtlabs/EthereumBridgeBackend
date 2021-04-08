@@ -193,6 +193,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             context.log(err);
             throw new Error("Failed to fetch price");
         });
+    await client.close();
 
     const timeStamp = new Date().toISOString();
     context.log("JavaScript timer trigger function ran!", timeStamp);

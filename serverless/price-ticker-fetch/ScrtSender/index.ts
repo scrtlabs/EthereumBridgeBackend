@@ -155,7 +155,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     }
 
     await db.collection("swap_tracker_object").updateOne({src: "scrt_sender"}, { $set: { nonce: currentBlock }});
-
+    await client.close();
     const timeStamp = new Date().toISOString();
     context.log("JavaScript timer trigger function ran!", timeStamp);
 };

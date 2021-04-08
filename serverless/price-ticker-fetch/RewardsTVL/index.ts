@@ -227,6 +227,8 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             context.log(`Failed update rewards stats: ${err}`);
         }
     );
+    await client.close();
+
 };
 
 
