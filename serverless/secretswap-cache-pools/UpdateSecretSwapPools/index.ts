@@ -45,7 +45,6 @@ const timerTrigger: AzureFunction = async function (
         })
     )
   );
-
   await client.close();
   context.log("Time it took", (Date.now() - start) / 1000, "seconds");
 };
