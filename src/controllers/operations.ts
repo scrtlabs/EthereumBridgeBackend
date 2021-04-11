@@ -25,11 +25,11 @@ export const getOperation = async (req: Request, res: Response) => {
         swap = await Swap.findOne({src_tx_hash: operation.transactionHash});
         if (swap) {
             //logger.debug(`found ${tx._id}`)
-            //const result = await operation.updateOne( {swap: tx._id, status: tx.status});
+            //const result = awaitx operation.updateOne( {swap: tx._id, status: tx.status});
             operation.swap = swap._id;
             operation.status = swap.status;
             await operation.save();
-            logger.info(`saved ${JSON.stringify(operation)}, ${JSON.stringify(swap)}`)
+            //logger.info(`saved ${JSON.stringify(operation)}, ${JSON.stringify(swap)}`)
             // if (result.error) {
             //     logger.debug(`failed to update operation ${id}: with swap ${tx._id}: ${JSON.stringify(result.error)}`)
             // } else {
