@@ -55,7 +55,7 @@ export const newOperation = async (req: Request, res: Response) => {
     });
 
     if (req.body.transactionHash) {
-        operation.transactionHash = req.body.transactionHash;
+        operation.transactionHash = escape(req.body.transactionHash);
     }
 
     await operation.save();
@@ -73,8 +73,10 @@ export const updateOperation = async (req: Request, res: Response) => {
         return;
     }
 
+    let txhash = escape(req.body.transactionHash);
+
     let resp = await Operation.updateOne({id: req.params.operation},
-        {transactionHash: req.body.transactionHash, status: SwapStatus.SWAP_NOT_EXIST});
+        {transactionHash: txhash, status: SwapStatus.SWAP_NOT_EXIST});
     if (resp.error) {
         logger.error(`Error updating transaction: ${JSON.stringify(resp.error)}`);
         res.status(400);
