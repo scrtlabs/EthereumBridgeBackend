@@ -17,6 +17,10 @@ export const getOperation = async (req: Request, res: Response) => {
     let swap: SwapDocument;
     if (operation.swap) {
         swap = await Swap.findById(operation.swap);
+        if (swap.status !== operation.status) {
+            operation.status = swap.status;
+            await operation.save();
+        }
     } else if (operation.transactionHash) {
         swap = await Swap.findOne({src_tx_hash: operation.transactionHash});
         if (swap) {
