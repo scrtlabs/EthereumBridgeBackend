@@ -15,14 +15,13 @@ export const logger = createLogger({
     transports: [
         new transports.Console({
             format: format.combine(
-                format.colorize({ all: true }),
                 format.padLevels(),
                 consoleFormat({
                     showMeta: true,
                     metaStrip: ["timestamp", "service"],
                     inspectOptions: {
                         depth: Infinity,
-                        colors: true,
+                        colors: false,
                         maxArrayLength: Infinity,
                         breakLength: 120,
                         compact: Infinity

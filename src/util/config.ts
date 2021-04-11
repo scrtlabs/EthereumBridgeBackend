@@ -1,6 +1,6 @@
 import fs from "fs";
 
-require("dotenv").config();
+//require("dotenv").config();
 import convict from "convict";
 
 const config = convict({
