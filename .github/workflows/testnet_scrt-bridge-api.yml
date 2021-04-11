@@ -1,0 +1,51 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - scrt-bridge-api
+
+on:
+  push:
+    branches:
+      - testnet
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Log in to registry
+      uses: docker/login-action@v1
+      with:
+        registry: https://enigmampc.azurecr.io/
+        username: ${{ secrets.AzureAppService_ContainerUsername_5e84483a6fdb4b30ac9d4f878fdfa6fb }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_b11c6875e66545f5b2bb3358edce4420 }}
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: ${{ secrets.AzureAppService_ContainerUsername_5e84483a6fdb4b30ac9d4f878fdfa6fb }}/bridge/backend-test:${{ github.sha }}
+        file: ./Dockerfile
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'scrt-bridge-api'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_01a25d1707cf465b83711e1007c62661 }}
+        images: 'enigmampc.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_5e84483a6fdb4b30ac9d4f878fdfa6fb }}/bridge/backend-test:${{ github.sha }}'
