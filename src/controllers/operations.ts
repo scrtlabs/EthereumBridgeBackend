@@ -1,7 +1,6 @@
 import {Request, Response} from "express";
 import {Operation, OperationDocument} from "../models/Operation";
 import {Swap, SwapDocument, SwapStatus} from "../models/Swap";
-import { v4 as uuidv4 } from "uuid";
 import logger from "../util/logger";
 import {check, param, validationResult} from "express-validator";
 
@@ -9,7 +8,7 @@ export const getOperation = async (req: Request, res: Response) => {
 
     const id = req.params.operation;
 
-    const operation: OperationDocument = await Operation.findOne({id: id}, {_id: false});
+    const operation: OperationDocument = await Operation.findOne({id: id});
     if (!operation) {
         res.status(404);
         res.send("Not found");
@@ -21,16 +20,19 @@ export const getOperation = async (req: Request, res: Response) => {
     } else if (operation.transactionHash) {
         tx = await Swap.findOne({src_tx_hash: operation.transactionHash});
         if (tx) {
-            logger.debug(`found ${tx._id}`)
-            const result = await Operation.updateOne({id: id}, {swap: tx._id, status: tx.status});
-
-            if (result.error) {
-                logger.debug(`failed to update operation ${id}: with swap ${tx._id}: ${JSON.stringify(result.error)}`)
-            } else {
-                logger.debug(`Updated operation ${id}: with swap ${tx._id} successfully`)
-            }
+            //logger.debug(`found ${tx._id}`)
+            //const result = await operation.updateOne( {swap: tx._id, status: tx.status});
+            operation.swap = tx._id;
+            operation.status = tx.status;
+            await operation.save();
+            // if (result.error) {
+            //     logger.debug(`failed to update operation ${id}: with swap ${tx._id}: ${JSON.stringify(result.error)}`)
+            // } else {
+            //     logger.debug(`Updated operation ${id}: with swap ${tx._id} successfully`)
+            // }
         }
     }
+    delete operation._id;
     res.json({operation, swap: tx});
 };
 

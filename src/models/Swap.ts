@@ -25,9 +25,15 @@ export interface SwapDocument extends mongoose.Document {
     src_network: string;
     src_tx_hash: string;
     status: number;
+    _id: string;
 }
 
 export const swapSchema = new mongoose.Schema({
+    _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        auto: true,
+    },
     created_on: Date,
     updated_on: Date,
     dst_coin: String,
