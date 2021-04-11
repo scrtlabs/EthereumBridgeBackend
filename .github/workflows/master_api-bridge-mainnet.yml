@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ secrets.AzureAppService_ContainerUsername_de5ae63520534b6a878242fb1576382e }}/bridge/backend:${{ github.sha }}
+        tags: enigmampc.azurecr.io/bridge/backend:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -48,4 +48,4 @@ jobs:
         app-name: 'api-bridge-mainnet'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_76d252c5a7d54848b8e468130bfd0556 }}
-        images: 'enigmampc.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_de5ae63520534b6a878242fb1576382e }}/bridge/backend:${{ github.sha }}'
+        images: 'enigmampc.azurecr.io/bridge/backend:${{ github.sha }}'
