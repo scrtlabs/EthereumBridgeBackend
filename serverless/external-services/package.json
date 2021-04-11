@@ -1,0 +1,12 @@
+{
+  "name": "external-services",
+  "version": "",
+  "description": "",
+  "scripts": {
+    "test": "echo \"No tests yet...\""
+  },
+  "author": "",
+  "dependencies": {
+    "@sushiswap/sushi-data": "^1.0.10"
+  }
+}
