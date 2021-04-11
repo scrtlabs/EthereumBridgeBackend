@@ -80,12 +80,14 @@ export const updateOperation = async (req: Request, res: Response) => {
 
     let txhash = escape(req.body.transactionHash);
 
-    let resp = await Operation.updateOne({id: req.params.operation},
-        {transactionHash: txhash, status: SwapStatus.SWAP_NOT_EXIST});
-    if (resp.error) {
-        logger.error(`Error updating transaction: ${JSON.stringify(resp.error)}`);
+    try {
+        await Operation.updateOne({id: req.params.operation},
+            {transactionHash: txhash, status: SwapStatus.SWAP_NOT_EXIST});
+    }
+    catch (e) {
+        logger.error(`Error updating transaction: ${JSON.stringify(e)}`);
         res.status(400);
-        res.send({result: "failed", message: resp.error});
+        res.send({result: "failed"});
         return;
     }
 
