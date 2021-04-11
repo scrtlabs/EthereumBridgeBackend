@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ secrets.AzureAppService_ContainerUsername_5e84483a6fdb4b30ac9d4f878fdfa6fb }}/bridge/backend-test:${{ github.sha }}
+        tags: enigmampc.azurecr.io/bridge/backend-test:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -48,4 +48,4 @@ jobs:
         app-name: 'scrt-bridge-api'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_01a25d1707cf465b83711e1007c62661 }}
-        images: 'enigmampc.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_5e84483a6fdb4b30ac9d4f878fdfa6fb }}/bridge/backend-test:${{ github.sha }}'
+        images: 'enigmampc.azurecr.io/bridge/backend-test:${{ github.sha }}'
