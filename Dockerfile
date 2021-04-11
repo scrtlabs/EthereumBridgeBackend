@@ -32,7 +32,7 @@ RUN npm ci --quiet --only=production
 ## We just need the build to execute the command
 COPY --from=builder /usr/src/app/dist ./dist
 
-COPY .env .
+# COPY .env .
 COPY config .
 
 EXPOSE 8080
