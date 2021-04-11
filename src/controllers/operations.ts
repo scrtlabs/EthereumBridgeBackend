@@ -14,17 +14,18 @@ export const getOperation = async (req: Request, res: Response) => {
         res.send("Not found");
         return;
     }
-    let tx: SwapDocument;
+    let swap: SwapDocument;
     if (operation.swap) {
-        tx = await Swap.findById(operation.swap);
+        swap = await Swap.findById(operation.swap);
     } else if (operation.transactionHash) {
-        tx = await Swap.findOne({src_tx_hash: operation.transactionHash});
-        if (tx) {
+        swap = await Swap.findOne({src_tx_hash: operation.transactionHash});
+        if (swap) {
             //logger.debug(`found ${tx._id}`)
             //const result = await operation.updateOne( {swap: tx._id, status: tx.status});
-            operation.swap = tx._id;
-            operation.status = tx.status;
+            operation.swap = swap._id;
+            operation.status = swap.status;
             await operation.save();
+            logger.info(`saved ${JSON.stringify(operation)}, ${JSON.stringify(swap)}`)
             // if (result.error) {
             //     logger.debug(`failed to update operation ${id}: with swap ${tx._id}: ${JSON.stringify(result.error)}`)
             // } else {
@@ -32,7 +33,7 @@ export const getOperation = async (req: Request, res: Response) => {
             // }
         }
     }
-    res.json({operation, swap: tx});
+    res.json({operation, swap});
 };
 
 export const newOperation = async (req: Request, res: Response) => {

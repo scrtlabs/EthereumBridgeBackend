@@ -15,11 +15,12 @@ export interface OperationDocument extends mongoose.Document {
 
 export const operationSchema = new Schema({
   id: String,
-  status: {
-    type: Number,
+  status: Number,
+  //{
+  //  type: Number,
     // get: (value: number) => SwapStatus[value],
     // set: (status: SwapStatus) => status.valueOf(),
-  },
+  //},
   swap: {
     required: false,
     type: Schema.Types.ObjectId,
