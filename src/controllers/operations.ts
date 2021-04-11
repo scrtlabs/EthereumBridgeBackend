@@ -32,7 +32,6 @@ export const getOperation = async (req: Request, res: Response) => {
             // }
         }
     }
-    delete operation._id;
     res.json({operation, swap: tx});
 };
 
