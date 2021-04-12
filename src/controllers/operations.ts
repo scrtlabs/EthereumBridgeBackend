@@ -66,7 +66,7 @@ export const newOperation = async (req: Request, res: Response) => {
     });
 
     if (req.body.transactionHash) {
-        operation.transactionHash = escape(req.body.transactionHash);
+        operation.transactionHash = req.body.transactionHash;
     }
 
     await operation.save();
