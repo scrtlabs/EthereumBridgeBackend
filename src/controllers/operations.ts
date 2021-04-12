@@ -4,6 +4,8 @@ import {Swap, SwapDocument, SwapStatus} from "../models/Swap";
 import logger from "../util/logger";
 import {check, param, validationResult} from "express-validator";
 
+const hashValidator = /^[0-9a-zA-Z|]/g;
+
 export const getOperation = async (req: Request, res: Response) => {
 
     const id = req.params.operation;
@@ -44,7 +46,11 @@ export const newOperation = async (req: Request, res: Response) => {
 
     await check("id", "Generated ID cannot be empty").not().isEmpty().run(req);
     await check("id", "Generated ID must be UUID").isUUID().run(req);
-    await check("transactionHash", "TransactionHash malformed").isAlphanumeric().isLength({min: 1, max: 512}).optional().run(req);
+    await check("transactionHash", "TransactionHash malformed")
+        .custom(field => field.match(hashValidator))
+        .isLength({min: 1, max: 512})
+        .optional()
+        .run(req);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         logger.error(`Error: ${JSON.stringify(errors.array())}`);
@@ -69,7 +75,10 @@ export const newOperation = async (req: Request, res: Response) => {
 
 export const updateOperation = async (req: Request, res: Response) => {
     await param("operation", "Operation ID must be UUID").isUUID().run(req);
-    await check("transactionHash", "TransactionHash malformed").isAlphanumeric().isLength({min: 1, max: 512}).run(req);
+    await check("transactionHash", "TransactionHash malformed")
+        .custom(field => field.match(hashValidator))
+        .isLength({min: 1, max: 512})
+        .run(req);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         logger.error(`Error updating transaction: ${JSON.stringify(errors.array())}`);
