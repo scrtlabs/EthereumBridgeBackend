@@ -87,11 +87,11 @@ export const updateOperation = async (req: Request, res: Response) => {
         return;
     }
 
-    let txhash = escape(req.body.transactionHash);
+    //let txhash = escape(req.body.transactionHash);
 
     try {
         await Operation.updateOne({id: req.params.operation},
-            {transactionHash: txhash, status: SwapStatus.SWAP_NOT_EXIST});
+            {transactionHash: req.body.transactionHash, status: SwapStatus.SWAP_NOT_EXIST});
     }
     catch (e) {
         logger.error(`Error updating transaction: ${JSON.stringify(e)}`);
