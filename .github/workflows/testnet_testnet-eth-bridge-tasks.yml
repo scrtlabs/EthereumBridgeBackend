@@ -36,7 +36,7 @@ jobs:
 
     - name: 'Run Azure Functions Action'
       uses: Azure/webapps-deploy@v2
-      id: fa
+      id: fa2
       with:
         app-name: 'testnet-eth-bridge-tasks'
         slot-name: 'production'
