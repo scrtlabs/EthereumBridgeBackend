@@ -35,10 +35,10 @@ jobs:
         popd
 
     - name: 'Run Azure Functions Action'
-      uses: Azure/webapps-deploy@v2
+      uses: Azure/functions-action@v1
       id: fa2
       with:
         app-name: 'testnet-eth-bridge-tasks'
         slot-name: 'production'
-        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        package: './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_61bbb1a27cf444349984addfa45203cf }}
