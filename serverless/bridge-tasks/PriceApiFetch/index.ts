@@ -13,6 +13,29 @@ const priceRelativeToUSD = (priceBTC: string, priceRelative: string): string => 
     return String(parseFloat(priceBTC) * parseFloat(priceRelative));
 };
 
+class ConstantPriceOracle implements PriceOracle {
+
+    priceMap = {
+        SIENNA: "6.0",
+        WSIENNA: "6.0"
+    }
+
+    async getPrices(symbols: string[]): Promise<PriceResult[]> {
+        let resp = symbols.map((symbol): PriceResult => {
+
+            let price = this.priceMap[symbol]
+            if (!price) {
+                return {
+                    symbol,
+                    price: undefined
+                };
+            }
+            return {symbol, price };
+        });
+        return Promise.resolve(resp);
+    };
+}
+
 class BinancePriceOracle implements PriceOracle {
     async getPrices(symbols: string[]): Promise<PriceResult[]> {
 
@@ -90,6 +113,8 @@ class CoinGeckoOracle implements PriceOracle {
         "YFL": "yflink",
         "ALPHA": "alpha-finance",
         "MATIC": "matic-network",
+        "BUSD": "binance-usd",
+        "BNB": "binancecoin"
     }
 
     symbolToID = symbol => {
@@ -147,7 +172,7 @@ interface PriceResult {
 }
 
 // disabling new BinancePriceOracle till we figure out the DAI stuff
-const oracles: PriceOracle[] = [new CoinGeckoOracle];
+const oracles: PriceOracle[] = [new CoinGeckoOracle, new ConstantPriceOracle];
 
 const uniLPPrefix = 'UNILP'
 
@@ -187,7 +212,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     ));
 
     let average_prices: PriceResult[] = [];
-    context.log(prices);
+    //context.log(prices);
 
     for (const symbol of symbols) {
 
@@ -202,7 +227,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 }
             });
         });
-        context.log(`${symbol} - ${total}:${length}`);
+        //context.log(`${symbol} - ${total}:${length}`);
         average_prices.push({
             symbol,
             price: (total / length).toFixed(4),
@@ -211,7 +236,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     }
 
 
-    context.log(average_prices);
+    //context.log(average_prices);
 
     await Promise.all(
         average_prices.map(async p => {
@@ -223,8 +248,8 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         });
     await client.close();
 
-    const timeStamp = new Date().toISOString();
-    context.log("JavaScript timer trigger function ran!", timeStamp);
+    // const timeStamp = new Date().toISOString();
+    // context.log("JavaScript timer trigger function ran!", timeStamp);
 };
 
 export default timerTrigger;

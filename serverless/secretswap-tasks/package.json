@@ -17,7 +17,8 @@
     "typescript": "^3.3.3"
   },
   "dependencies": {
-    "mongodb": "^3.6.5",
+    "mongodb": "^3.6.6",
+    "node-fetch": "^2.6.1",
     "secretjs": "^0.11.0"
   }
 }
