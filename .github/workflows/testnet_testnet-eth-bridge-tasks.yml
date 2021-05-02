@@ -11,6 +11,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: testnet-eth-bridge-tasks    # set this to your application's name
+  AZURE_FUNCTIONAPP_NAME_BSC: testnet-bsc-bridge-tasks    # set this to your application's name
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'serverless\bridge-tasks' # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '14.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
 
@@ -37,11 +38,20 @@ jobs:
         npm run test --if-present
         popd
 
-    - name: 'Run Azure Functions Action'
+    - name: 'Run Azure Functions Action ETH'
       uses: Azure/functions-action@v1
-      id: bridgeFA
+      id: bridgeETHFA
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
         slot-name: 'production'
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_61bbb1a27cf444349984addfa45203cf }}
+
+    - name: 'Run Azure Functions Action BSC'
+      uses: Azure/functions-action@v1
+      id: bridgeBSCFA
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_BSC }}
+        slot-name: 'production'
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BSC }}
