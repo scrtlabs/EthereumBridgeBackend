@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_NAME: testnet-eth-bridge-tasks    # set this to your application's name
+  AZURE_FUNCTIONAPP_NAME_ETH: testnet-eth-bridge-tasks    # set this to your application's name
   AZURE_FUNCTIONAPP_NAME_BSC: testnet-bsc-bridge-tasks    # set this to your application's name
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'serverless\bridge-tasks' # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '14.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
@@ -34,7 +34,7 @@ jobs:
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         npm install
-        npm run build:production
+        npm run build --if-present
         npm run test --if-present
         popd
 
@@ -42,7 +42,7 @@ jobs:
       uses: Azure/functions-action@v1
       id: bridgeETHFA
       with:
-        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_ETH }}
         slot-name: 'production'
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_61bbb1a27cf444349984addfa45203cf }}
