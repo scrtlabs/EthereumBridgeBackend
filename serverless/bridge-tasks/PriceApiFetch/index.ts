@@ -114,7 +114,7 @@ class CoinGeckoOracle implements PriceOracle {
         "ALPHA": "alpha-finance",
         "MATIC": "matic-network",
         "BUSD": "binance-usd",
-        "BNB": "binancecoin"
+        "BNB": "binancecoin",
     }
 
     symbolToID = symbol => {
