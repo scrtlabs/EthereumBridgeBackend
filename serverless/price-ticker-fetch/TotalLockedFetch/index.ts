@@ -212,7 +212,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             if (token.src_address === "native") {
                 balance = await getEthBalance(process.env["MultisigAddress"]);
             }
-            else if (token.src_coin === "WSCRT" || token.src_coin === "SEFI") {
+            else if (token.src_coin === "WSCRT" || token.src_coin === "SEFI" || token.src_coin === "WSIENNA") {
                 balance = await getErcSupply(token.src_address);
                 context.log(`total supply for ${token.src_coin}: ${balance}`);
             } else if (token.display_props.symbol.startsWith(uniLPPrefix)) {

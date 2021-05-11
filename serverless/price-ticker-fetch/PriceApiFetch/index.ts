@@ -13,6 +13,30 @@ const priceRelativeToUSD = (priceBTC: string, priceRelative: string): string => 
     return String(parseFloat(priceBTC) * parseFloat(priceRelative));
 };
 
+class ConstantPriceOracle implements PriceOracle {
+
+    priceMap = {
+        SIENNA: "6.0",
+        WSIENNA: "6.0"
+    }
+
+    async getPrices(symbols: string[]): Promise<PriceResult[]> {
+        let resp = symbols.map((symbol): PriceResult => {
+
+            let price = this.priceMap[symbol]
+            if (!price) {
+                return {
+                    symbol,
+                    price: undefined
+                };
+            }
+            return {symbol, price };
+        });
+        return Promise.resolve(resp);
+    };
+}
+
+
 class BinancePriceOracle implements PriceOracle {
     async getPrices(symbols: string[]): Promise<PriceResult[]> {
 
@@ -147,7 +171,7 @@ interface PriceResult {
 }
 
 // disabling new BinancePriceOracle till we figure out the DAI stuff
-const oracles: PriceOracle[] = [new CoinGeckoOracle];
+const oracles: PriceOracle[] = [new CoinGeckoOracle, new ConstantPriceOracle];
 
 const uniLPPrefix = 'UNILP'
 
