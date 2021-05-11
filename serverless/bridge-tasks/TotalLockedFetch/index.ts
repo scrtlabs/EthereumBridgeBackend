@@ -218,7 +218,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             }
             else if (token.src_coin === "WSCRT" || token.src_coin === "SEFI") {
                 balance = await getErcSupply(token.src_address);
-                context.log(`total supply for ${token.src_coin}: ${balance}`);
+                //context.log(`total supply for ${token.src_coin}: ${balance}`);
             } else if (token.display_props.symbol.startsWith(uniLPPrefix)) {
                 // uni price updates from here
                 balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
@@ -227,6 +227,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             }
 
             else {
+                //context.log(`updating supply for  ${process.env["MultisigAddress"]}: ${token.src_address}`);
                 balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
             }
 

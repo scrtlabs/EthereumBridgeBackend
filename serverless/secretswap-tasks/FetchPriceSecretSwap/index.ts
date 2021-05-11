@@ -1,7 +1,7 @@
 import {AzureFunction, Context} from "@azure/functions";
 import {MongoClient} from "mongodb";
 import {priceFromPoolInScrt} from "./utils";
-import {BroadcastMode, Secp256k1Pen, SigningCosmWasmClient} from "secretjs";
+import {BroadcastMode, CosmWasmClient, Secp256k1Pen, SigningCosmWasmClient} from "secretjs";
 import fetch from "node-fetch";
 
 const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
@@ -17,24 +17,13 @@ const seed = Uint8Array.from([
     102, 148, 214, 132, 243, 222,  97,   4
 ]);
 
-const faucet = {
-    mnemonic: `${process.env["faucetMnemonic"]}`,
-    address: `${process.env["faucetAddress"]}`
-};
 
 const sefiAddress = `${process.env["sefiAddress"] || "secret12q2c5s5we5zn9pq43l0rlsygtql6646my0sqfm"}`;
 const sefiPairAddress = `${process.env["sefiPairAddress"] || "secret1l56ke78aj9jxr4wu64h4rm20cnqxevzpf6tmfc"}`;
 
-const getSecretJs = async (): Promise<SigningCosmWasmClient> => {
-    const pen = await Secp256k1Pen.fromMnemonic(faucet.mnemonic);
-    return new SigningCosmWasmClient(`${process.env["secretNodeURL"]}`, faucet.address, (signBytes) => pen.sign(signBytes),
+const getSecretJs = (): CosmWasmClient => {
+    return new CosmWasmClient(`${process.env["secretNodeURL"]}`,
         seed,
-        {
-            send: {
-                amount: [{amount: "80000", denom: "uscrt"}],
-                gas: "80000",
-            },
-        },
         BroadcastMode.Block
     );
 };
@@ -72,7 +61,7 @@ class SecretSwapOracle implements PriceOracle {
 
     async getPrices(symbols: string[], context?: any): Promise<PriceResult[]> {
 
-        const secretjs = await getSecretJs();
+        const secretjs = getSecretJs();
         let priceScrt;
         try {
             priceScrt = await getScrtPrice();

@@ -1,4 +1,4 @@
-import {SigningCosmWasmClient} from "secretjs";
+import {CosmWasmClient, SigningCosmWasmClient} from "secretjs";
 
 
 const buildAssetInfo = (inputAmount: string, address: string, contractHash: string) => {
@@ -26,7 +26,7 @@ interface GenericSimulationResult {
 type SimulationReponse = GenericSimulationResult;
 
 const SimulateResult = async (params: {
-    secretjs: SigningCosmWasmClient;
+    secretjs: CosmWasmClient;
     input: {amount: string; address: string; contractHash: string};
     pair: string;
 }): Promise<SimulationReponse> => {
@@ -46,7 +46,7 @@ const SimulateResult = async (params: {
 
 
 const handleSimulation = async (
-    secretjs: SigningCosmWasmClient,
+    secretjs: CosmWasmClient,
     input: {amount: string; address: string; contractHash: string},
     pair: string,
     context?: any,
@@ -72,7 +72,7 @@ const handleSimulation = async (
 };
 
 export const GetContractCodeHash = async (params: {
-    secretjs: SigningCosmWasmClient;
+    secretjs: CosmWasmClient;
     address: string;
 }): Promise<string> => {
     const { secretjs, address } = params;
@@ -81,7 +81,7 @@ export const GetContractCodeHash = async (params: {
 };
 
 
-export const priceFromPoolInScrt = async (secretjs: SigningCosmWasmClient,
+export const priceFromPoolInScrt = async (secretjs: CosmWasmClient,
                                     address: string,
                                     pair: string,
                                     context?: any): Promise<number> => {
