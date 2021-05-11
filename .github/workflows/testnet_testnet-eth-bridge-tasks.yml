@@ -12,8 +12,8 @@ on:
 env:
   AZURE_FUNCTIONAPP_NAME_ETH: testnet-eth-bridge-tasks    # set this to your application's name
   AZURE_FUNCTIONAPP_NAME_BSC: testnet-bsc-bridge-tasks    # set this to your application's name
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'serverless\bridge-tasks' # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '14.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'serverless/bridge-tasks' # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '12.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
 
 jobs:
   build-and-deploy:
