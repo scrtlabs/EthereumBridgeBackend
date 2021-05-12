@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js project to Azure Function App - mainnet-secretswap-tasks
+name: Build and deploy Node.js project to Azure Function App - testnet-eth-bridge-tasks
 
 on:
   push:
@@ -10,14 +10,17 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_NAME_SWAP: mainnet-secretswap-tasks    # set this to your application's name
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'serverless/secretswap-tasks' # set this to the path to your web app project, defaults to the repository root
+  AZURE_FUNCTIONAPP_NAME_ETH: mainnet-eth-bridge-tasks    # set this to your application's name
+  AZURE_FUNCTIONAPP_NAME_BSC: mainnet-bsc-bridge-tasks    # set this to your application's name
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'serverless/bridge-tasks' # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '12.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
     steps:
+
+
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@v2
 
@@ -35,11 +38,20 @@ jobs:
         npm run test --if-present
         popd
 
-    - name: 'Run Azure Functions Action'
+    - name: 'Run Azure Functions Action ETH'
       uses: Azure/functions-action@v1
-      id: mainnet_swap_fa
+      id: mainnet_bridgeETHFA
       with:
-        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_SWAP }}
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_ETH }}
         slot-name: 'production'
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_b1a7a929ea8843bab850efcf37fc4dd3 }}
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ETH_MNT }}
+
+    - name: 'Run Azure Functions Action BSC'
+      uses: Azure/functions-action@v1
+      id: mainnet_bridgeBSCFA
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_BSC }}
+        slot-name: 'production'
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BSC_MNT }}
