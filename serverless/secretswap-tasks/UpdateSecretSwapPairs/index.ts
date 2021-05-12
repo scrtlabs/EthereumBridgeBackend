@@ -26,10 +26,17 @@ const timerTrigger: AzureFunction = async function (
   );
   const secretjs = new CosmWasmClient(secretNodeURL);
 
-  const pairsAddressesNotInDb = (await secretjs.getContracts(pairCodeId))
-    .filter((p) => p.label.endsWith(`${factoryContract}-${pairCodeId}`))
-    .map((p) => p.address)
-    .filter((addr) => !pairsInDb.has(addr));
+  let pairsAddressesNotInDb: string[];
+  try {
+    pairsAddressesNotInDb = (await secretjs.getContracts(pairCodeId))
+      .filter((p) => p.label.endsWith(`${factoryContract}-${pairCodeId}`))
+      .map((p) => p.address)
+      .filter((addr) => !pairsInDb.has(addr));
+  } catch (e) {
+    context.log("secretjs error on getContracts:", e.message);
+    client.close();
+    return;
+  }
 
   if (pairsAddressesNotInDb.length === 0) {
     context.log("No new pairs.");
@@ -37,20 +44,32 @@ const timerTrigger: AzureFunction = async function (
     return;
   }
 
-  const pairs = (
-    await Promise.all(
-      pairsAddressesNotInDb.map((addr) =>
-        secretjs.queryContractSmart(addr, { pair: {} })
+  let pairs: any[];
+  try {
+    pairs = (
+      await Promise.all(
+        pairsAddressesNotInDb.map((addr) =>
+          secretjs.queryContractSmart(addr, { pair: {} })
+        )
       )
-    )
-  ).map((p) => {
-    p._id = p.contract_addr;
-    return p;
-  });
+    ).map((p) => {
+      p._id = p.contract_addr;
+      return p;
+    });
+  } catch (e) {
+    context.log("secretjs error on queryContractSmart:", e.message);
+    client.close();
+    return;
+  }
 
-  const res = await dbCollection.insertMany(pairs, {});
-  client.close();
-  context.log(res);
+  try {
+    const res = await dbCollection.insertMany(pairs, {});
+    context.log(res);
+  } catch (e) {
+    context.log("mongodb error on insertMany:", e.message);
+  } finally {
+    client.close();
+  }
 };
 
 export default timerTrigger;
