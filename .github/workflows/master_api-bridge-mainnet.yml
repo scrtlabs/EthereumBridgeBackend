@@ -56,5 +56,5 @@ jobs:
       with:
         app-name: 'bridge-bsc-mainnet'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BSC_MNT }}
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BACKEND_APP_BSC_MNT }}
         images: 'enigmampc.azurecr.io/bridge/backend:${{ github.sha }}'
