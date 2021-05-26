@@ -41,11 +41,20 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Deploy to Azure Web App
+    - name: Deploy ETH
       id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'api-bridge-mainnet'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_76d252c5a7d54848b8e468130bfd0556 }}
+        images: 'enigmampc.azurecr.io/bridge/backend:${{ github.sha }}'
+
+    - name: Deploy BSC
+      id: deploy-to-webapp2
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'bsc-bridge-mainnet'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BSC_MNT }}
         images: 'enigmampc.azurecr.io/bridge/backend:${{ github.sha }}'

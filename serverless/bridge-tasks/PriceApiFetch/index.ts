@@ -83,6 +83,7 @@ class CoinGeckoOracle implements PriceOracle {
         "SCRT": "secret",
         "SSCRT": "secret",
         "ETH": "ethereum",
+        "bETH": "ethereum",
         "OCEAN": "ocean-protocol",
         "USDT": "tether",
         "YFI": "yearn-finance",
