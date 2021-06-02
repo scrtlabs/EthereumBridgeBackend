@@ -112,6 +112,7 @@ app.get("/proof/eth/:addr", claimsController.getEthProof);
 app.get("/proof/scrt/:addr", claimsController.getScrtProof);
 //app.get("/sushi_pool", secretSwapPairsController.getSushiPool);
 
+app.get("/cashback/network_avg_rate/", cashbackController.getCashbackRate);
 app.post(
   "/cashback/network_avg_rate/:rate",
   cashbackController.newCashbackBurn

@@ -8,6 +8,20 @@ import {
 
 const MAX_RETRIES = 5;
 
+export const getCashbackRate = async (req: Request, res: Response) => {
+  try {
+    const result = await CashbackStat.findOne({ type: StatType.NetworkAvg });
+
+    res.status(200);
+    res.send({ rate: result.avg_rate, count: result.total_count });
+  } catch (e) {
+    logger.error(`Error getting rate: ${e.message}`);
+    res.status(400);
+    res.send({ result: "failed" });
+    return;
+  }
+};
+
 export const newCashbackBurn = async (req: Request, res: Response) => {
   const rate = Number(req.params.rate);
 
@@ -21,9 +35,9 @@ export const newCashbackBurn = async (req: Request, res: Response) => {
     const newRate = await updateRate(rate);
 
     res.status(200);
-    res.json({ newRate: newRate });
+    res.json({ result: "success", newRate: newRate });
   } catch (e) {
-    logger.error(`Error updating transaction: ${e.message}`);
+    logger.error(`Error updating rate: ${e.message}`);
     res.status(400);
     res.send({ result: "failed" });
     return;
