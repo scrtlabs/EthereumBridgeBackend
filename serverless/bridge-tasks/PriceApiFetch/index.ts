@@ -255,7 +255,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     await Promise.all(
         average_prices.map(async p => {
-            await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
+            await db.collection("token_pairing").updateOne({"display_props.symbol": new RegExp(p.symbol, 'i')}, { $set: { price: p.price }});
         })).catch(
         (err) => {
             context.log(err);
