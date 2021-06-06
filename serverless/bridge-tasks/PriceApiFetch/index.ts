@@ -116,6 +116,19 @@ class CoinGeckoOracle implements PriceOracle {
         "MATIC": "matic-network",
         "BUSD": "binance-usd",
         "BNB": "binancecoin",
+        "ADA": "cardano",
+        "XRP": "xrp",
+        "DOGE": "dogecoin",
+        "DOT": "polkadot",
+        "BCH": "bitcoin-cash",
+        "LTC": "litecoin",
+        "TRX": "tron",
+        "CAKE": "pancakeswap",
+        "BAKE": "bakeryswap",
+        "VNX": "venus",
+        "LINA": "linear",
+        "FINE": "refinable",
+        "BUNNY": "pancake-bunny"
     }
 
     symbolToID = symbol => {
@@ -198,9 +211,10 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     let symbols;
 
+    // the split '(' handles the (BSC) tokens
     try {
          symbols = tokens
-             .map(t => t.display_props.symbol)
+             .map(t => t.display_props.symbol.split('(')[0])
              .filter(t => !t.startsWith(uniLPPrefix))
              .filter(t => !t.startsWith("SEFI"));
     } catch (e) {
