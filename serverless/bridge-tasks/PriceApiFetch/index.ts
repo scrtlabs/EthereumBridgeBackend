@@ -117,7 +117,7 @@ class CoinGeckoOracle implements PriceOracle {
         "BUSD": "binance-usd",
         "BNB": "binancecoin",
         "ADA": "cardano",
-        "XRP": "xrp",
+        "XRP": "ripple",
         "DOGE": "dogecoin",
         "DOT": "polkadot",
         "BCH": "bitcoin-cash",
