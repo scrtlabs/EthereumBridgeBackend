@@ -16,8 +16,8 @@ const priceRelativeToUSD = (priceBTC: string, priceRelative: string): string => 
 class ConstantPriceOracle implements PriceOracle {
 
     priceMap = {
-        SIENNA: "6.0",
-        WSIENNA: "6.0"
+        // SIENNA: "6.0",
+        // WSIENNA: "6.0"
     }
 
     async getPrices(symbols: string[]): Promise<PriceResult[]> {
@@ -128,7 +128,9 @@ class CoinGeckoOracle implements PriceOracle {
         "VNX": "venus",
         "LINA": "linear",
         "FINE": "refinable",
-        "BUNNY": "pancake-bunny"
+        "BUNNY": "pancake-bunny",
+        "SIENNA": "sienna-erc20",
+        "WSIENNA": "sienna-erc20"
     }
 
     symbolToID = symbol => {
