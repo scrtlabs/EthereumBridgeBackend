@@ -125,7 +125,7 @@ class CoinGeckoOracle implements PriceOracle {
         "TRX": "tron",
         "CAKE": "pancakeswap-token",
         "BAKE": "bakerytoken",
-        "VNX": "venus",
+        "XVS": "venus",
         "LINA": "linear",
         "FINE": "refinable",
         "BUNNY": "pancake-bunny",
