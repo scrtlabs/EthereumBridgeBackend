@@ -132,6 +132,8 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         }
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
+    const dbBsc = await client.db(`${process.env["mongodbNameBsc"]}`);
+
     const pools: RewardPoolData[] = await db.collection("rewards_data").find({}).toArray().catch(
         (err: any) => {
             context.log(err);
@@ -139,12 +141,22 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         });
 
 
-    const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
+    let tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
         }
     );
+    const bscTokens = await dbBsc.collection("token_pairing").find({}).limit(100).toArray().catch(
+        (err: any) => {
+            context.log(err);
+            throw new Error("Failed to get tokens from collection");
+        }
+    );
+
+    tokens = tokens.concat(bscTokens);
+
+    console.log(`${JSON.stringify(tokens)}`)
 
     const pairs = await db.collection("secretswap_pairs").find({}).limit(1000).toArray().catch(
         (err: any) => {
