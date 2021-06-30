@@ -227,9 +227,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     let prices: PriceResult[][] = await Promise.all(oracles.map(
         async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
     ));
-
+    context.log(symbols);
     let average_prices: PriceResult[] = [];
-    //context.log(prices);
+    
 
     for (const symbol of symbols) {
 
