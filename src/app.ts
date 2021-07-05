@@ -21,6 +21,8 @@ import * as secretSwapPairsController from "./controllers/secretswap_pairs";
 import * as secretSwapPoolsController from "./controllers/secretswap_pools";
 import * as signerHealthController from "./controllers/signer_health";
 import * as claimsController from "./controllers/claims";
+import * as votesController from "./controllers/votes";
+
 import config from "./util/config";
 
 // import Agenda from "agenda";
@@ -111,5 +113,7 @@ app.get("/proof/eth/:addr", claimsController.getEthProof);
 app.get("/proof/scrt/:addr", claimsController.getScrtProof);
 //app.get("/sushi_pool", secretSwapPairsController.getSushiPool);
 
+
+app.get("/secret_votes/", votesController.getAllVotes);
 
 export default app;
