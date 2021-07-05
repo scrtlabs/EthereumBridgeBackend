@@ -22,7 +22,10 @@ import * as secretSwapPoolsController from "./controllers/secretswap_pools";
 import * as signerHealthController from "./controllers/signer_health";
 import * as claimsController from "./controllers/claims";
 import * as cashbackController from "./controllers/cashback_stats";
+import * as votesController from "./controllers/votes";
+
 import config from "./util/config";
+import { SecretVotes } from "./models/SecretVote";
 
 // import Agenda from "agenda";
 
@@ -117,5 +120,7 @@ app.post(
   "/cashback/network_avg_rate/:rate",
   cashbackController.newCashbackBurn
 );
+
+app.get("/secret_votes/", votesController.getAllVotes);
 
 export default app;
