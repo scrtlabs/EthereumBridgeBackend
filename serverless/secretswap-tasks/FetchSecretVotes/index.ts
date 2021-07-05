@@ -52,7 +52,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     const voteAddresses = (await dbCollection.find().toArray()).map(v => v.address);
 
     // Take only those that don't exist on the db yet
-    const votesToAdd = voteContracts.filter(c => c.creator === voteFactoryAddr).filter(c => !voteAddresses.includes(c.address));
+    const votesToAdd = voteContracts
+        .filter(c => c.creator === voteFactoryAddr)
+        .filter(c => !voteAddresses.includes(c.address));
 
     votesToAdd.forEach(vote => {
         context.log(`Querying VoteInfo for ${vote.address} ..`);
@@ -70,11 +72,16 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 min_threshold: voteInfo.config.min_threshold,
                 choices: voteInfo.config.choices
             };
-            dbCollection.insertOne(voteToSave).then(() => context.log(`Saved vote ${vote.address} to db`));
+            dbCollection.insertOne(voteToSave).then(
+                () => context.log(`Saved vote ${vote.address} to db`),
+                (error) => context.log(`Couldn't save vote ${vote.address} to db`)
+            );
         }, function (error) {
-            context.log(`Couldn't update vote ${vote.address}: failed to query vote info`);
+            context.log(`Failed to query vote info for ${vote.address}: ${error}`);
         })
     });
+
+    await sleep(30000);
 
     ///////////////////
 
@@ -111,5 +118,11 @@ const queryInfo = function () {
 // Promise helper
 const reflect = p => p.then(v => ({ v, status: "fulfilled" }),
     e => ({ e, status: "rejected" }));
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
 
 export default timerTrigger;
