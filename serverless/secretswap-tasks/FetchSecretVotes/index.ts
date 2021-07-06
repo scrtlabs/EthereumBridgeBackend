@@ -76,10 +76,10 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             };
             dbCollection.insertOne(voteToSave).then(
                 () => context.log(`Saved vote ${vote.address} to db`),
-                (error) => context.log(`Couldn't save vote ${vote.address} to db`)
+                (error) => context.log(`Couldn't save vote ${vote.address} to db: ${JSON.stringify(error)}`)
             );
         }, function (error) {
-            context.log(`Failed to query vote info for ${vote.address}: ${error}`);
+            context.log(`Failed to query vote info for ${vote.address}: ${JSON.stringify(error)}`);
         })
     });
 
@@ -101,10 +101,6 @@ const createMongoClient = function (context: Context): Promise<MongoClient> {
 const queryInfo = function () {
     return { "vote_info": {} }
 }
-
-// Promise helper
-const reflect = p => p.then(v => ({ v, status: "fulfilled" }),
-    e => ({ e, status: "rejected" }));
 
 function sleep(ms) {
     return new Promise((resolve) => {
