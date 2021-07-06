@@ -58,8 +58,10 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     votesToAdd.forEach(vote => {
         context.log(`Querying VoteInfo for ${vote.address} ..`);
-        queryClient.queryContractSmart(vote.address, queryInfo()).then(function (voteInfo: VoteInfo) {
+        queryClient.queryContractSmart(vote.address, queryInfo()).then(function (resp: { "vote_info": VoteInfo }) {
+            const voteInfo = resp.vote_info;
             context.log(`Successfully queried vote ${vote.address}`);
+            context.log(`result is: ${JSON.stringify(voteInfo)}`);
 
             const voteToSave: Vote = {
                 address: vote.address,
@@ -81,22 +83,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         })
     });
 
-    await sleep(30000);
-
-    ///////////////////
-
-    // let infoPromises: Promise<VoteInfo>[] = new Array();
-    // for (let i = 0; i < votesToAdd.length; i++) {
-    //     infoPromises.push(queryClient.queryContractSmart(votesToAdd[i].address, queryInfo()));
-    // }
-
-    // // Discard the failed queries
-    // const results = (await Promise.all(infoPromises.map(reflect))).filter(r => r.status === "fulfilled");
-    // context.log(`updating db with: ${results}`);
-
-    // results.forEach(res => {
-    //     dbCollection.insertOne(res.v);
-    // });
+    await sleep(30000); // Give the asynchronous logs time to print
 };
 
 const createMongoClient = function (context: Context): Promise<MongoClient> {
