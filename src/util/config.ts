@@ -10,36 +10,14 @@ const config = convict({
         arg: "nodeEnv",
         env: "NODE_ENV"
     },
-    dbUser: {
-        format: String,
-        default: "",
-        arg: "dbuser",
-        env: "MONGODB_USER"
-    },
-    dbPass: {
-        format: String,
-        default: "",
-        arg: "dbpass",
-        env: "MONGODB_PASS"
-    },
-    dbName: {
-        format: String,
-        default: "",
-        arg: "dbName",
-        env: "MONGODB_NAME"
-    },
+
     port: {
-        format: Number,
+        format: 'port',
         default: 8000,
         arg: "port",
         env: "PORT"
     },
-    db: {
-        format: String,
-        default: "",
-        arg: "db",
-        env: "DB_URL"
-    },
+
     ethProvider: {
         format: String,
         default: "",
@@ -57,6 +35,56 @@ const config = convict({
         default: "http://localhost:3000",
         arg: "appUrl",
         env: "APP_URL"
+    },
+    dataSources: {
+        dbInfo: {
+            uri: {
+                format: String,
+                default: "",
+                arg: "uri",
+                env: "MONGODB_URL"
+            },
+            dbUser: {
+                format: String,
+                default: "",
+                arg: "dbuser",
+                env: "MONGODB_USER"
+            },
+            dbPass: {
+                format: String,
+                default: "",
+                arg: "dbpass",
+                env: "MONGODB_PASS"
+            },
+        },
+        dbOptions: {
+            format: '*',
+            default: {}
+        },
+        bridge: {
+            dbName: {
+                format: String,
+                default: "bridge",
+                arg: "dbname",
+                env: "MONGODB_NAME_BRIDGE"
+            },
+        },
+        secretswap: {
+            dbName: {
+                format: String,
+                default: "secretswap",
+                arg: "dbname",
+                env: "MONGODB_NAME_SECRETSWAP"
+            },
+        },
+        ui: {
+            dbName: {
+                format: String,
+                default: "ui",
+                arg: "dbname",
+                env: "MONGODB_NAME_UI"
+            },
+        }
     }
 });
 

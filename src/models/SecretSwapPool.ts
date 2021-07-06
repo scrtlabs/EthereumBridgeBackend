@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
+import SwapConnDB from "../database/secretswap";
 
 export interface TokenPool {
   info: {
@@ -30,7 +31,7 @@ export const secretSwapPoolSchema = new mongoose.Schema(
   { collection: "secretswap_pools" }
 );
 
-export const SecretSwapPools = mongoose.model<SecretSwapPoolDocument>(
+export const SecretSwapPools = SwapConnDB.getConn().model<SecretSwapPoolDocument>(
   "secretswap_pools",
   secretSwapPoolSchema
 );

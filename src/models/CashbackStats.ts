@@ -1,4 +1,5 @@
 import mongoose, { Schema, Types } from "mongoose";
+import UIConnDB from "../database/ui";
 
 export enum StatType {
   NetworkAvg = 'network_avg'
@@ -16,7 +17,7 @@ export const CashbackStatSchema = new Schema({
   total_count: { type: Number, required: true },
 });
 
-export const CashbackStat = mongoose.model<CashbackStatDocument>(
+export const CashbackStat = UIConnDB.getConn().model<CashbackStatDocument>(
   "cashback_stat",
   CashbackStatSchema
 );

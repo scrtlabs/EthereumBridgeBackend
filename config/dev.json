@@ -1,4 +1,11 @@
 {
   "port": 8000,
-  "appUrl": "http://localhost:3000"
+  "appUrl": "http://localhost:3000",
+  "dataSources": {
+    "dbOptions": {
+      "useNewUrlParser": true,
+      "useCreateIndex": true,
+      "useUnifiedTopology": true
+    }
+  }
 }

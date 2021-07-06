@@ -1,4 +1,11 @@
 {
   "port": 8080,
-  "appUrl": "https://bridge.enigma.co"
+  "appUrl": "https://bridge.enigma.co",
+  "dataSources": {
+    "dbOptions": {
+      "useNewUrlParser": true,
+      "useCreateIndex": true,
+      "useUnifiedTopology": true
+    }
+  }
 }

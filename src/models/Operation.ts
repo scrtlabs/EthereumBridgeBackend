@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose, { Schema, Types } from "mongoose";
 import { SwapDocument, Swap } from "./Swap";
+import UIConnDB from "../database/ui";
 
 export interface OperationDocument extends mongoose.Document {
   id: string;
@@ -33,7 +34,7 @@ export const operationSchema = new Schema({
   amount: { type: String, required: false },
 });
 
-export const Operation = mongoose.model<OperationDocument>(
+export const Operation = UIConnDB.getConn().model<OperationDocument>(
   "operation",
   operationSchema
 );

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
+import SwapConnDB from "../database/secretswap";
 
 export interface Token {
   token: {
@@ -32,7 +33,7 @@ export const secretSwapPairSchema = new mongoose.Schema(
   { collection: "secretswap_pairs" }
 );
 
-export const SecretSwapPairs = mongoose.model<SecretSwapPairDocument>(
+export const SecretSwapPairs = SwapConnDB.getConn().model<SecretSwapPairDocument>(
   "secretswap_pairs",
   secretSwapPairSchema
 );

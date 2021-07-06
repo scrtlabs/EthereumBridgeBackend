@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
+import BridgeConnDB from "../database/bridge";
 
 
 export interface SignerHealthDocument extends mongoose.Document {
@@ -18,4 +19,4 @@ export const signerHealthSchema = new mongoose.Schema({
     to_scrt: Boolean,
 }, { collection: "signer_health" });
 
-export const SignerHealth = mongoose.model<SignerHealthDocument>("signer_health", signerHealthSchema);
+export const SignerHealth = BridgeConnDB.getConn().model<SignerHealthDocument>("signer_health", signerHealthSchema);

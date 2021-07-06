@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
+import BridgeConnDB from "../database/bridge";
 
 export enum SwapStatus {
     SWAP_UNSIGNED = 1,
@@ -51,4 +52,4 @@ export const swapSchema = new mongoose.Schema({
     },
 }, { collection: "swap" });
 
-export const Swap = mongoose.model<SwapDocument>("swap", swapSchema);
+export const Swap = BridgeConnDB.getConn().model<SwapDocument>("swap", swapSchema);

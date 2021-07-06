@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
+import UIConnDB from "../database/ui";
 
 
 export interface PairingDocument extends mongoose.Document {
@@ -45,4 +46,4 @@ export const pairingSchema = new mongoose.Schema({
 //     return next();
 // });
 
-export const Pairing = mongoose.model<PairingDocument>("token_pairing", pairingSchema);
+export const Pairing = UIConnDB.getConn().model<PairingDocument>("token_pairing", pairingSchema);

@@ -178,6 +178,16 @@ interface LockedResult {
     address: string;
 }
 
+const updateDbPriceNew = async (db, symbol, price) => {
+    await db.collection("token_price").updateOne(
+        {"symbol": symbol},
+        { $set: { price: price } }
+    ).catch(
+        (err) => {
+            throw new Error(`Failed to update price: ${err}`);
+        });
+}
+
 const updateDbPrice = async (db, address, price) => {
     await db.collection("token_pairing").updateOne(
         {"src_address": address},
@@ -224,6 +234,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 balance = await getErcBalance(process.env["MultisigAddress"], token.src_address);
                 token.price = await getUniPrice(token.src_address);
                 await updateDbPrice(db, token.src_address, token.price);
+                await updateDbPriceNew(db, token.display_props.symbol, token.price);
             }
 
             else {
