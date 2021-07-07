@@ -22,6 +22,11 @@ interface VoteInfo {
   };
 }
 
+interface Tally {
+  choices: string[];
+  tally: string[];
+}
+
 export const getAllVotes = async (req: Request, res: Response) => {
   try {
     const votes = await SecretVotes.find();
@@ -106,9 +111,12 @@ export const finalizeVote = async (req: Request, res: Response) => {
   const newVoteAddr = req.params.voteAddr;
   const queryClient = new CosmWasmClient(config.secretNodeUrl);
 
-  let resp: { vote_info: VoteInfo };
+  let info_resp: { vote_info: VoteInfo };
   try {
-    resp = await queryClient.queryContractSmart(newVoteAddr, queryVoteInfo());
+    info_resp = await queryClient.queryContractSmart(
+      newVoteAddr,
+      queryVoteInfo()
+    );
   } catch (err) {
     const error = `Error querying voting contract ${newVoteAddr}`;
     logger.error(error);
@@ -120,7 +128,7 @@ export const finalizeVote = async (req: Request, res: Response) => {
     return;
   }
 
-  const voteInfo = resp.vote_info;
+  const voteInfo = info_resp.vote_info;
 
   if (!voteInfo.config.ended) {
     const error = `Vote ${newVoteAddr} has not been finalized yet`;
@@ -131,6 +139,29 @@ export const finalizeVote = async (req: Request, res: Response) => {
     return;
   }
 
+  let voteStatus: VoteStatus;
+  if (!voteInfo.config.valid) {
+    voteStatus = VoteStatus.Failed;
+  } else {
+    let tally_resp: { tally: Tally };
+    try {
+      tally_resp = await queryClient.queryContractSmart(
+        newVoteAddr,
+        queryTally()
+      );
+    } catch (err) {
+      const error = `Error querying tally for ${newVoteAddr}`;
+      logger.error(error);
+      logger.error(JSON.stringify(err));
+
+      res.status(400);
+      res.send({ result: error, error: JSON.stringify(err) });
+      return;
+    }
+
+    voteStatus = getStatus(tally_resp.tally);
+  }
+
   try {
     const vote: VoteDocument = await SecretVotes.findOneAndUpdate(
       {
@@ -139,7 +170,7 @@ export const finalizeVote = async (req: Request, res: Response) => {
       {
         ended: voteInfo.config.ended,
         valid: voteInfo.config.valid,
-        status: voteInfo.config.valid ? VoteStatus.Passed : VoteStatus.Failed,
+        status: voteStatus,
       }
     ).orFail();
 
@@ -149,9 +180,10 @@ export const finalizeVote = async (req: Request, res: Response) => {
   } catch (e) {
     const error = `Could note update vote ${newVoteAddr}`;
     logger.error(error);
+    logger.error(e);
 
     res.status(400);
-    res.send({ result: error });
+    res.send({ result: error, error: e });
 
     return;
   }
@@ -164,4 +196,25 @@ export const finalizeVote = async (req: Request, res: Response) => {
 
 const queryVoteInfo = () => {
   return { vote_info: {} };
+};
+
+const queryTally = () => {
+  return { tally: {} };
+};
+
+const getStatus = (tally: Tally): VoteStatus => {
+  if (
+    tally.choices.includes("no") &&
+    tally.choices.includes("yes") &&
+    tally.choices.length === 2
+  ) {
+    const no_tally = Number(tally.tally[tally.choices.indexOf("no")]);
+    const yes_tally = Number(tally.tally[tally.choices.indexOf("yes")]);
+
+    if (yes_tally <= no_tally) {
+      return VoteStatus.Failed;
+    }
+  }
+
+  return VoteStatus.Passed; // If not only yes/no => always passed
 };
