@@ -12,7 +12,7 @@ const config = convict({
     },
 
     port: {
-        format: 'port',
+        format: "port",
         default: 8000,
         arg: "port",
         env: "PORT"
@@ -58,14 +58,14 @@ const config = convict({
             },
         },
         dbOptions: {
-            format: '*',
+            format: "*",
             default: {}
         },
         bridge: {
             dbName: {
                 format: String,
                 default: "bridge",
-                arg: "dbname",
+                arg: "bridge-dbname",
                 env: "MONGODB_NAME_BRIDGE"
             },
         },
@@ -73,7 +73,7 @@ const config = convict({
             dbName: {
                 format: String,
                 default: "secretswap",
-                arg: "dbname",
+                arg: "swap-dbname",
                 env: "MONGODB_NAME_SECRETSWAP"
             },
         },
@@ -81,7 +81,7 @@ const config = convict({
             dbName: {
                 format: String,
                 default: "ui",
-                arg: "dbname",
+                arg: "ui-dbname",
                 env: "MONGODB_NAME_UI"
             },
         }

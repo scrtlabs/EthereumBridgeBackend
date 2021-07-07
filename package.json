@@ -6,7 +6,7 @@
         "type": "git",
         "url": "https://github.com/Microsoft/TypeScript-Node-Starter"
     },
-    "author": "Bowden Kelly",
+    "author": "Enigma MPC",
     "license": "MIT",
     "scripts": {
         "build": "npm run build-ts",
@@ -20,7 +20,7 @@
         "start": "npm run serve",
         "test": "jest --forceExit --coverage --verbose",
         "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
-        "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
+        "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"yarn watch-ts\" \"yarn serve-debug\"",
         "watch-node": "nodemon dist/server.js",
         "watch-test": "npm run test -- --watchAll",
         "watch-ts": "tsc -w"
@@ -37,7 +37,6 @@
         "express": "^4.17.1",
         "express-session": "^1.17.1",
         "express-validator": "^6.10.0",
-        "lodash": "^4.17.21",
         "lusca": "^1.6.1",
         "mongoose": "^5.12.3",
         "node-cache": "^5.1.2",
@@ -65,7 +64,6 @@
         "@types/express-session": "^1.15.14",
         "@types/jest": "^24.0.23",
         "@types/jquery": "^3.3.31",
-        "@types/lodash": "^4.14.141",
         "@types/lusca": "^1.6.1",
         "@types/node": "^12.7.8",
         "@types/node-sass": "^4.11.0",
