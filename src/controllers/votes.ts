@@ -9,6 +9,7 @@ interface VoteInfo {
   metadata: {
     title: string;
     description: string;
+    vote_type: string;
     author_addr: string;
     author_alias: string;
   };
@@ -81,6 +82,7 @@ export const newVote = async (req: Request, res: Response) => {
       address: newVoteAddr,
       title: voteInfo.metadata.title,
       description: voteInfo.metadata.description,
+      vote_type: voteInfo.metadata.vote_type,
       author_addr: voteInfo.metadata.author_addr,
       author_alias: voteInfo.metadata.author_alias,
       end_timestamp: voteInfo.config.end_timestamp,

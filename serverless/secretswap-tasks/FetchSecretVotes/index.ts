@@ -17,13 +17,14 @@ const votesCollection: string = "secret_votes";
 enum VoteStatus {
   InProgress = "IN PROGRESS",
   Passed = "PASSED",
-  Failed = "FAILED"
+  Failed = "FAILED",
 }
 
 interface Vote {
   address: string;
   title: string;
   description: string;
+  vote_type: string;
   author_addr: string;
   author_alias: string;
   end_timestamp: number;
@@ -39,6 +40,7 @@ interface VoteInfo {
   metadata: {
     title: string;
     description: string;
+    vote_type: string;
     author_addr: string;
     author_alias: string;
   };
@@ -84,6 +86,7 @@ const timerTrigger: AzureFunction = async function (
           address: vote.address,
           title: voteInfo.metadata.title,
           description: voteInfo.metadata.description,
+          vote_type: voteInfo.metadata.vote_type,
           author_addr: voteInfo.metadata.author_addr,
           author_alias: voteInfo.metadata.author_alias,
           end_timestamp: voteInfo.config.end_timestamp,
