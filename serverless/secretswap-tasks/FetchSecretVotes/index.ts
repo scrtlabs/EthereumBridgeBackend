@@ -14,6 +14,12 @@ const voteFactoryAddr: string = process.env["voteFactoryAddr"];
 
 const votesCollection: string = "secret_votes";
 
+enum VoteStatus {
+  InProgress = "IN PROGRESS",
+  Passed = "PASSED",
+  Failed = "FAILED"
+}
+
 interface Vote {
   address: string;
   title: string;
@@ -24,6 +30,9 @@ interface Vote {
   quorum: number;
   min_threshold: number;
   choices: string[];
+  ended: boolean;
+  valid: boolean;
+  status: VoteStatus;
 }
 
 interface VoteInfo {
@@ -81,6 +90,9 @@ const timerTrigger: AzureFunction = async function (
           quorum: voteInfo.config.quorum,
           min_threshold: voteInfo.config.min_threshold,
           choices: voteInfo.config.choices,
+          ended: voteInfo.config.ended,
+          valid: voteInfo.config.valid,
+          status: VoteStatus.InProgress,
         };
         dbCollection.insertOne(voteToSave).then(
           () => context.log(`Saved vote ${vote.address} to db`),
