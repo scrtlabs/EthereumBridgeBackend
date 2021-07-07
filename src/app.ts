@@ -23,6 +23,8 @@ import * as signerHealthController from "./controllers/signer_health";
 import * as claimsController from "./controllers/claims";
 import * as cashbackController from "./controllers/cashback_stats";
 import * as votesController from "./controllers/votes";
+import * as votesController from "./controllers/votes";
+
 import config from "./util/config";
 
 // import Agenda from "agenda";
@@ -122,5 +124,7 @@ app.post(
 app.get("/secret_votes/", votesController.getAllVotes);
 app.post("/secret_votes/:voteAddr", votesController.newVote);
 app.post("/secret_votes/finalize/:voteAddr", votesController.finalizeVote);
+
+app.get("/secret_votes/", votesController.getAllVotes);
 
 export default app;

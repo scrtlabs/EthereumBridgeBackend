@@ -156,6 +156,10 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     tokens = tokens.concat(bscTokens);
 
+    tokens = tokens.concat(bscTokens);
+
+    console.log(`${JSON.stringify(tokens)}`)
+
     const pairs = await db.collection("secretswap_pairs").find({}).limit(1000).toArray().catch(
         (err: any) => {
             context.log(err);
