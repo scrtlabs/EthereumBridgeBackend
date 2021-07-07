@@ -120,5 +120,7 @@ app.post(
 );
 
 app.get("/secret_votes/", votesController.getAllVotes);
+app.post("/secret_votes/:voteAddr", votesController.newVote);
+app.post("/secret_votes/finalize/:voteAddr", votesController.finalizeVote);
 
 export default app;

@@ -1,5 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
+export enum VoteStatus {
+  InProgress = "IN PROGRESS",
+  Passed = "PASSED",
+  Failed = "FAILED",
+}
+
 export interface VoteDocument extends mongoose.Document {
   address: string;
   title: string;
@@ -10,6 +16,9 @@ export interface VoteDocument extends mongoose.Document {
   quorum: number;
   min_threshold: number;
   choices: string[];
+  ended: boolean;
+  valid: boolean;
+  status: string;
 }
 
 export const VoteSchema = new Schema({
@@ -22,6 +31,9 @@ export const VoteSchema = new Schema({
   quorum: { type: Number, required: true },
   min_threshold: { type: Number, required: true },
   choices: { type: [String], required: true },
+  ended: { type: Boolean, required: true },
+  valid: { type: Boolean, required: true },
+  status: { type: String, enum: VoteStatus, required: true },
 });
 
 export const SecretVotes = mongoose.model<VoteDocument>(
