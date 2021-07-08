@@ -1,4 +1,4 @@
-import {CosmWasmClient, SigningCosmWasmClient} from "secretjs";
+import {CosmWasmClient} from "secretjs";
 
 
 const buildAssetInfo = (inputAmount: string, address: string, contractHash: string) => {
@@ -82,9 +82,9 @@ export const GetContractCodeHash = async (params: {
 
 
 export const priceFromPoolInScrt = async (secretjs: CosmWasmClient,
-                                    address: string,
-                                    pair: string,
-                                    context?: any): Promise<number> => {
+                                          address: string,
+                                          pair: string,
+                                          context?: any): Promise<number> => {
 
     const inputAmount = "1000000";
     const contractHash = await GetContractCodeHash({secretjs, address});

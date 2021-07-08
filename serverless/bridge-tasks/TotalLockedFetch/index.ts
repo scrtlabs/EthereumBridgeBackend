@@ -3,7 +3,9 @@ import { MongoClient } from "mongodb";
 import Web3 from "web3";
 import fetch from "node-fetch";
 
-const supportedNetworks = ["ethereum", "binancesmartchain"]
+const uiDbUri = process.env["mongodbUrlUi"];
+const uiDbName = process.env["mongodbNameUi"];
+const supportedNetworks = ["ethereum", "binancesmartchain"];
 
 const erc20ABI = [
     {
@@ -139,9 +141,9 @@ const uniABI = [
         payable: false,
         type: "function" as "function"
     }
-]
+];
 
-const uniLPPrefix = 'UNILP'
+const uniLPPrefix = "UNILP";
 const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
 
 const ethPrice = async (): Promise<string> => {
@@ -150,7 +152,7 @@ const ethPrice = async (): Promise<string> => {
         // eslint-disable-next-line @typescript-eslint/camelcase
         vs_currencies: "USD"
     }));
-    return (await price.json())["ethereum"].usd
+    return (await price.json())["ethereum"].usd;
 };
 
 // this only works for ETH pairs... todo: generalize it when we want to reward other pools
@@ -186,7 +188,7 @@ const updateDbPriceNew = async (db, symbol, price) => {
         (err) => {
             throw new Error(`Failed to update price: ${err}`);
         });
-}
+};
 
 const updateDbPrice = async (db, address, price) => {
     await db.collection("token_pairing").updateOne(
@@ -196,18 +198,19 @@ const updateDbPrice = async (db, address, price) => {
             (err) => {
                 throw new Error(`Failed to update price: ${err}`);
             });
-}
+};
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
+    const client: MongoClient = await MongoClient.connect(uiDbUri,
         { useUnifiedTopology: true, useNewUrlParser: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
         }
     );
-    const db = await client.db(`${process.env["mongodbName"]}`);
+
+    const db = await client.db(uiDbName);
 
     const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
         (err: any) => {

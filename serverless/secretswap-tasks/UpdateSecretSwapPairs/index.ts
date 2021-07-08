@@ -3,10 +3,10 @@ import { CosmWasmClient } from "secretjs";
 import { MongoClient } from "mongodb";
 
 const secretNodeURL: string = process.env["secretNodeURL"];
-const mongodbName: string = process.env["mongodbName"];
-const mongodbUrl: string = process.env["mongodbUrl"];
+const mongodbName: string = process.env["mongodbNameSwap"];
+const mongodbUrl: string = process.env["mongodbUrlSwap"];
 const factoryContract: string = process.env["factoryContract"];
-const pairCodeId: number = Number(process.env["pairCodeId"]);
+const pairCodeId = Number(process.env["pairCodeId"]);
 
 const timerTrigger: AzureFunction = async function (
   context: Context,

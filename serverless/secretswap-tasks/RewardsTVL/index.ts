@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {AzureFunction, Context} from "@azure/functions";
 import {MongoClient} from "mongodb";
@@ -70,6 +71,7 @@ function querySnip20Balance(address: string, key: string) {
     };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getLPPrice = async (queryClient: CosmWasmClient, contractAddress: string, symbol: string, tokens: any[], pairs: any[], context?: any): Promise<string> => {
     const [prefix, s1, s2] = symbol.split("-");
 
@@ -122,7 +124,7 @@ const getPriceForSymbol = async (queryClient: CosmWasmClient, contractAddress: s
 };
 
 
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
     const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
         { useUnifiedTopology: true, useNewUrlParser: true }).catch(
