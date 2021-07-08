@@ -21,6 +21,7 @@ import * as secretSwapPairsController from "./controllers/secretswap_pairs";
 import * as secretSwapPoolsController from "./controllers/secretswap_pools";
 import * as signerHealthController from "./controllers/signer_health";
 import * as claimsController from "./controllers/claims";
+import * as cashbackController from "./controllers/cashback_stats";
 import * as votesController from "./controllers/votes";
 
 import config from "./util/config";
@@ -113,6 +114,15 @@ app.get("/proof/eth/:addr", claimsController.getEthProof);
 app.get("/proof/scrt/:addr", claimsController.getScrtProof);
 //app.get("/sushi_pool", secretSwapPairsController.getSushiPool);
 
+app.get("/cashback/network_avg_rate/", cashbackController.getCashbackRate);
+app.post(
+  "/cashback/network_avg_rate/:rate",
+  cashbackController.newCashbackBurn
+);
+
+app.get("/secret_votes/", votesController.getAllVotes);
+app.post("/secret_votes/:voteAddr", votesController.newVote);
+app.post("/secret_votes/finalize/:voteAddr", votesController.finalizeVote);
 
 app.get("/secret_votes/", votesController.getAllVotes);
 

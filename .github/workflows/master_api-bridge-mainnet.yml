@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy container app to Azure Web App - api-bridge-mainnet
+name: Mainnet Backend - Build and Deploy
 
 on:
   push:
@@ -41,11 +41,20 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Deploy to Azure Web App
+    - name: Deploy ETH
       id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'api-bridge-mainnet'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_76d252c5a7d54848b8e468130bfd0556 }}
+        images: 'enigmampc.azurecr.io/bridge/backend:${{ github.sha }}'
+
+    - name: Deploy BSC
+      id: deploy-to-webapp2
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'bridge-bsc-mainnet'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BACKEND_APP_BSC_MNT }}
         images: 'enigmampc.azurecr.io/bridge/backend:${{ github.sha }}'
