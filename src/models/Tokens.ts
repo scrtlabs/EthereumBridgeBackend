@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
 import UIConnDB from "../database/ui";
+import SwapConnDB from "../database/secretswap";
 
 type TOKEN_USAGE = "BRIDGE" | "REWARDS" | "LPSTAKING";
 
@@ -37,4 +38,4 @@ export const tokenSchema = new mongoose.Schema({
 //     user.uid = generateApiKey();
 //     return next();
 // });
-export const Tokens = UIConnDB.getConn().model<TokenDocument>("secret_tokens", tokenSchema);
+export const Tokens = SwapConnDB.getConn().model<TokenDocument>("secret_tokens", tokenSchema);

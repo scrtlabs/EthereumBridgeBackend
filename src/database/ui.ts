@@ -1,4 +1,4 @@
-import {Connection, ConnectOptions} from "mongoose";
+import {Connection, ConnectOptions, createConnection, set, connect} from "mongoose";
 import * as mongoose from "mongoose";
 import config from "../util/config";
 import Logger from "../util/logger";
@@ -17,8 +17,9 @@ export default class UIConnDB {
         this.options.dbName = config.dataSources.ui.dbName;
         this.options.user = config.dataSources.dbInfo.dbUser;
         this.options.pass = config.dataSources.dbInfo.dbPass;
+        Logger.info(`db uri: ${config.dataSources.dbInfo.uri}`);
 
-        this.conn = mongoose.createConnection(config.dataSources.dbInfo.uri, this.options);
+        this.conn = createConnection(config.dataSources.dbInfo.uri, this.options);
     }
 
     static getConn () {
@@ -33,15 +34,15 @@ export default class UIConnDB {
     async initDB () {
         return new Promise((resolve, reject) => {
             if (!this.conn) {
-                this.conn = mongoose.createConnection(config.dataSources.dbInfo.uri, this.options);
+                this.conn = createConnection(config.dataSources.dbInfo.uri, this.options);
             }
 
             if (config.env === "dev") {
-                mongoose.set("debug", true);
+                set("debug", true);
             }
 
             this.conn.on("disconnected", () => {
-                mongoose.connect(config.dataSources.dbInfo.uri);
+                connect(config.dataSources.dbInfo.uri);
             });
 
             this.conn.on("error", (err) => {
@@ -53,7 +54,7 @@ export default class UIConnDB {
             });
 
             this.conn.once("open", () => {
-                Logger.info("Connected to MongoDB", config.dataSources.dbInfo.uri);
+                Logger.info(`Connected to MongoDB ${config.dataSources.dbInfo.uri}`);
             });
         });
     }

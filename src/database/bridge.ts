@@ -1,9 +1,9 @@
-import {Connection, ConnectOptions} from 'mongoose';
-import * as mongoose from 'mongoose';
-import config from '../util/config';
-import Logger from '../util/logger';
+import {Connection, ConnectOptions, createConnection, set, connect} from "mongoose";
+import * as mongoose from "mongoose";
+import config from "../util/config";
+import Logger from "../util/logger";
 
-require('mongoose').Promise = Promise;
+require("mongoose").Promise = Promise;
 
 export default class BridgeConnDB {
     static connInst: BridgeConnDB = null;
@@ -16,8 +16,8 @@ export default class BridgeConnDB {
         this.options.dbName = config.dataSources.bridge.dbName;
         this.options.user = config.dataSources.dbInfo.dbUser;
         this.options.pass = config.dataSources.dbInfo.dbPass;
-
-        this.conn = mongoose.createConnection(config.dataSources.dbInfo.uri, this.options);
+        Logger.info(`${config.dataSources.dbInfo.uri}`);
+        this.conn = createConnection(config.dataSources.dbInfo.uri, this.options);
     }
 
     static getConn () {
@@ -32,27 +32,27 @@ export default class BridgeConnDB {
     async initDB () {
         return new Promise((resolve, reject) => {
             if (!this.conn) {
-                this.conn = mongoose.createConnection(config.dataSources.dbInfo.uri, this.options);
+                this.conn = createConnection(config.dataSources.dbInfo.uri, this.options);
             }
 
-            if (config.env === 'dev') {
-                mongoose.set('debug', true);
+            if (config.env === "dev") {
+                set("debug", true);
             }
 
-            this.conn.on('disconnected', () => {
-                mongoose.connect(config.dataSources.dbInfo.uri);
+            this.conn.on("disconnected", () => {
+                connect(config.dataSources.dbInfo.uri);
             });
 
-            this.conn.on('error', (err) => {
+            this.conn.on("error", (err) => {
                 reject(err);
             });
 
-            this.conn.on('open', () => {
+            this.conn.on("open", () => {
                 resolve(this.conn);
             });
 
-            this.conn.once('open', () => {
-                Logger.info('Connected to MongoDB', config.dataSources.dbInfo.uri);
+            this.conn.once("open", () => {
+                Logger.info(`Connected to MongoDB ${config.dataSources.dbInfo.uri}`);
             });
         });
     }

@@ -1,6 +1,6 @@
 import fs from "fs";
 
-//require("dotenv").config();
+require("dotenv").config();
 import convict from "convict";
 
 const config = convict({
@@ -64,7 +64,7 @@ const config = convict({
         bridge: {
             dbName: {
                 format: String,
-                default: "bridge",
+                default: "secret-bridge-eth",
                 arg: "bridge-dbname",
                 env: "MONGODB_NAME_BRIDGE"
             },
@@ -80,7 +80,7 @@ const config = convict({
         ui: {
             dbName: {
                 format: String,
-                default: "ui",
+                default: "bridge-ui-eth",
                 arg: "ui-dbname",
                 env: "MONGODB_NAME_UI"
             },
