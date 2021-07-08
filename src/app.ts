@@ -23,7 +23,6 @@ import * as signerHealthController from "./controllers/signer_health";
 import * as claimsController from "./controllers/claims";
 import * as cashbackController from "./controllers/cashback_stats";
 import * as votesController from "./controllers/votes";
-import * as votesController from "./controllers/votes";
 
 import config from "./util/config";
 
