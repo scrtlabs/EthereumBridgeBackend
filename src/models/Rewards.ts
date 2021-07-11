@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import mongoose from "mongoose";
 import UIConnDB from "../database/ui";
+import SwapConnDB from "../database/secretswap";
 
 // export interface Token {
 //     symbol: string;
@@ -34,4 +35,4 @@ export const rewardsSchema = new mongoose.Schema({
     deadline: String,
 }, { collection: "rewards_data" });
 
-export const Rewards = UIConnDB.getConn().model<RewardsDocument>("rewards", rewardsSchema);
+export const Rewards = SwapConnDB.getConn().model<RewardsDocument>("rewards", rewardsSchema);

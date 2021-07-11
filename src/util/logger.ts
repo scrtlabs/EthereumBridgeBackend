@@ -1,4 +1,3 @@
-import winston from "winston";
 import { createLogger, format, transports } from "winston";
 import { consoleFormat } from "winston-console-format";
 
@@ -8,17 +7,14 @@ export const logger = createLogger({
         format.timestamp(),
         format.ms(),
         format.errors({ stack: true }),
-        format.splat(),
-        format.json()
+        format.simple(),
     ),
-    defaultMeta: { service: "Test" },
     transports: [
         new transports.Console({
             format: format.combine(
                 format.padLevels(),
                 consoleFormat({
-                    showMeta: true,
-                    metaStrip: ["timestamp", "service"],
+                    showMeta: false,
                     inspectOptions: {
                         depth: Infinity,
                         colors: false,
@@ -47,7 +43,7 @@ export const logger = createLogger({
 if (process.env.NODE_ENV !== "production") {
     logger.debug("Logging initialized at debug level");
 } else {
-    logger.info(`Logging initialized at ${logger.level}`)
+    logger.info(`Logging initialized at ${logger.level}`);
 }
 
 

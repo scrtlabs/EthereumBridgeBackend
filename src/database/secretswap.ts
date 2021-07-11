@@ -15,6 +15,7 @@ export default class SwapConnDB {
         this.options.dbName = config.dataSources.secretswap.dbName;
         this.options.user = config.dataSources.dbInfo.dbUser;
         this.options.pass = config.dataSources.dbInfo.dbPass;
+        Logger.info(`connecting to db: ${config.dataSources.dbInfo.uri}`);
 
         this.conn = createConnection(config.dataSources.dbInfo.uri, this.options);
     }

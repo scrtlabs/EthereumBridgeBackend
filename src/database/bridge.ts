@@ -16,7 +16,7 @@ export default class BridgeConnDB {
         this.options.dbName = config.dataSources.bridge.dbName;
         this.options.user = config.dataSources.dbInfo.dbUser;
         this.options.pass = config.dataSources.dbInfo.dbPass;
-        Logger.info(`${config.dataSources.dbInfo.uri}`);
+        Logger.info(`connecting to db: ${config.dataSources.dbInfo.uri}`);
         this.conn = createConnection(config.dataSources.dbInfo.uri, this.options);
     }
 

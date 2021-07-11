@@ -1,5 +1,4 @@
 import {Connection, ConnectOptions, createConnection, set, connect} from "mongoose";
-import * as mongoose from "mongoose";
 import config from "../util/config";
 import Logger from "../util/logger";
 
@@ -17,7 +16,7 @@ export default class UIConnDB {
         this.options.dbName = config.dataSources.ui.dbName;
         this.options.user = config.dataSources.dbInfo.dbUser;
         this.options.pass = config.dataSources.dbInfo.dbPass;
-        Logger.info(`db uri: ${config.dataSources.dbInfo.uri}`);
+        Logger.info(`connecting to db: ${config.dataSources.dbInfo.uri}`);
 
         this.conn = createConnection(config.dataSources.dbInfo.uri, this.options);
     }
