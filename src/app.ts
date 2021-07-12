@@ -9,7 +9,7 @@ import cors from "cors";
 import bluebird from "bluebird";
 
 import * as swapController from "./controllers/swaps";
-import * as tokenController from "./controllers/tokens";
+import * as tokenController from "./controllers/pairings";
 import * as opController from "./controllers/operations";
 import * as rewardsController from "./controllers/rewards";
 // import * as secretSwapPairsController from "./controllers/secretswap_pairs";
