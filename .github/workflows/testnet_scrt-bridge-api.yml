@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy container app to Azure Web App - scrt-bridge-api
+name: ETH Testnet API Deploy
 
 on:
   push:
@@ -48,4 +48,4 @@ jobs:
         app-name: 'scrt-bridge-api'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_01a25d1707cf465b83711e1007c62661 }}
-        images: 'enigmampc.azurecr.io/bridge/backend-test:${{ github.sha }}'
+        images: 'enigmampc.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_5e84483a6fdb4b30ac9d4f878fdfa6fb }}/bridge/backend-test:${{ github.sha }}'
