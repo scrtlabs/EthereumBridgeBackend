@@ -136,7 +136,7 @@ export const finalizeVote = async (req: Request, res: Response) => {
     const error = `Vote ${newVoteAddr} has not been finalized yet`;
     logger.error(error);
 
-    res.status(400);
+    res.status(200);
     res.send({ result: error });
     return;
   }
