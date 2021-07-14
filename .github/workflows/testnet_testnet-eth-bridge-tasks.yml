@@ -43,7 +43,7 @@ jobs:
       id: bridgeETHFA
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_ETH }}
-        slot-name: 'production'
+        slot-name: 'staging'
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_61bbb1a27cf444349984addfa45203cf }}
 
@@ -52,6 +52,6 @@ jobs:
       id: bridgeBSCFA
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_BSC }}
-        slot-name: 'production'
+        slot-name: 'staging'
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BSC }}
