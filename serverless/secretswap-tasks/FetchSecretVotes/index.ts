@@ -31,7 +31,7 @@ interface Vote {
   quorum: number;
   min_threshold: number;
   choices: string[];
-  ended: boolean;
+  finalized: boolean;
   valid: boolean;
   status: VoteStatus;
 }
@@ -49,7 +49,7 @@ interface VoteInfo {
     quorum: number;
     min_threshold: number;
     choices: string[];
-    ended: boolean;
+    finalized: boolean;
     valid: boolean;
   };
 }
@@ -93,7 +93,7 @@ const timerTrigger: AzureFunction = async function (
           quorum: voteInfo.config.quorum,
           min_threshold: voteInfo.config.min_threshold,
           choices: voteInfo.config.choices,
-          ended: voteInfo.config.ended,
+          finalized: voteInfo.config.finalized,
           valid: voteInfo.config.valid,
           status: VoteStatus.InProgress,
         };

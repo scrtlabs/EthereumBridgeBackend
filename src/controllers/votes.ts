@@ -18,7 +18,7 @@ interface VoteInfo {
     quorum: number;
     min_threshold: number;
     choices: string[];
-    ended: boolean;
+    finalized: boolean;
     valid: boolean;
   };
 }
@@ -89,7 +89,7 @@ export const newVote = async (req: Request, res: Response) => {
       quorum: voteInfo.config.quorum,
       min_threshold: voteInfo.config.min_threshold,
       choices: voteInfo.config.choices,
-      ended: voteInfo.config.ended,
+      finalized: voteInfo.config.finalized,
       valid: voteInfo.config.valid,
       status: VoteStatus.InProgress,
     },
@@ -132,11 +132,11 @@ export const finalizeVote = async (req: Request, res: Response) => {
 
   const voteInfo = info_resp.vote_info;
 
-  if (!voteInfo.config.ended) {
+  if (!voteInfo.config.finalized) {
     const error = `Vote ${newVoteAddr} has not been finalized yet`;
     logger.error(error);
 
-    res.status(400);
+    res.status(200);
     res.send({ result: error });
     return;
   }
@@ -170,7 +170,7 @@ export const finalizeVote = async (req: Request, res: Response) => {
         address: newVoteAddr,
       },
       {
-        ended: voteInfo.config.ended,
+        ended: voteInfo.config.finalized,
         valid: voteInfo.config.valid,
         status: voteStatus,
       }
