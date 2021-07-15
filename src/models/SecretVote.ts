@@ -17,7 +17,7 @@ export interface VoteDocument extends mongoose.Document {
   quorum: number;
   min_threshold: number;
   choices: string[];
-  ended: boolean;
+  finalized: boolean;
   valid: boolean;
   status: string;
 }
@@ -33,7 +33,7 @@ export const VoteSchema = new Schema({
   quorum: { type: Number, required: true },
   min_threshold: { type: Number, required: true },
   choices: { type: [String], required: true },
-  ended: { type: Boolean, required: true },
+  finalized: { type: Boolean, required: true },
   valid: { type: Boolean, required: true },
   status: { type: String, enum: VoteStatus, required: true },
 });
