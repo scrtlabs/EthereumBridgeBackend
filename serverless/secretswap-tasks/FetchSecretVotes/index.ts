@@ -34,6 +34,10 @@ interface Vote {
   finalized: boolean;
   valid: boolean;
   status: VoteStatus;
+  reveal_com: {
+    n: number;
+    revealers: string[];
+  }
 }
 
 interface VoteInfo {
@@ -51,6 +55,10 @@ interface VoteInfo {
     choices: string[];
     finalized: boolean;
     valid: boolean;
+  };
+  reveal_com: {
+    n: number;
+    revealers: string[];
   };
 }
 
@@ -96,6 +104,10 @@ const timerTrigger: AzureFunction = async function (
           finalized: voteInfo.config.finalized,
           valid: voteInfo.config.valid,
           status: VoteStatus.InProgress,
+          reveal_com: {
+            n: voteInfo.reveal_com.n,
+            revealers: voteInfo.reveal_com.revealers,
+          }
         };
         dbCollection.insertOne(voteToSave).then(
           () => context.log(`Saved vote ${vote.address} to db`),

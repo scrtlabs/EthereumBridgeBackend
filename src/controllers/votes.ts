@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import logger from "../util/logger";
-import {} from "../models/CashbackStats";
 import { SecretVotes, VoteDocument, VoteStatus } from "../models/SecretVote";
 import { CosmWasmClient } from "secretjs";
 import config from "../util/config";
@@ -21,6 +20,10 @@ interface VoteInfo {
     finalized: boolean;
     valid: boolean;
   };
+  reveal_com: {
+    n: number;
+    revealers: string[];
+  }
 }
 
 interface Tally {
@@ -92,6 +95,10 @@ export const newVote = async (req: Request, res: Response) => {
       finalized: voteInfo.config.finalized,
       valid: voteInfo.config.valid,
       status: VoteStatus.InProgress,
+      reveal_com: {
+        n: voteInfo.reveal_com.n,
+        revealers: voteInfo.reveal_com.revealers,
+      }
     },
   ]);
 
