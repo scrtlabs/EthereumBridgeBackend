@@ -6,7 +6,7 @@ name: BSC Testnet API Deploy
 on:
   push:
     branches:
-      - testnet
+      - testnet-new
   workflow_dispatch:
 
 jobs:

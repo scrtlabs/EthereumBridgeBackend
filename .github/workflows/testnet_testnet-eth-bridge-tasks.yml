@@ -6,7 +6,7 @@ name: Testnet Bridge Tasks - Build and deploy Function App
 on:
   push:
     branches:
-      - testnet
+      - testnet-new
   workflow_dispatch:
 
 env:
