@@ -3,9 +3,19 @@ import { MongoClient } from "mongodb";
 import Web3 from "web3";
 import fetch from "node-fetch";
 
+// *************** ENVIRONMENT VARIABLES  ********** //
+
 const uiDbUri = process.env["mongodbUrlUi"];
 const uiDbName = process.env["mongodbNameUi"];
+const w3 = new Web3(process.env["EthProvider"]);
+
+// *************** CONSTANTS  ********** //
+
 const supportedNetworks = ["ethereum", "binancesmartchain"];
+const uniLPPrefix = "UNILP";
+const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
+
+// *************** INTERFACES  ********** //
 
 const erc20ABI = [
     {
@@ -81,30 +91,6 @@ const erc20ABI = [
     }
 ];
 
-const w3 = new Web3(process.env["EthProvider"]);
-
-const getEthBalance = async (address: string): Promise<string> => {
-    return await w3.eth.getBalance(address);
-};
-
-const getErcSupply = async (token: string): Promise<string> => {
-    const contract = new w3.eth.Contract(erc20ABI, token);
-
-    const result = await contract.methods.totalSupply().call();
-
-    return w3.utils.toBN(result).toString();
-};
-
-const getErcBalance = async (address: string, token: string): Promise<string> => {
-
-    const contract = new w3.eth.Contract(erc20ABI, token);
-
-    const result = await contract.methods.balanceOf(address).call();
-
-    return w3.utils.toBN(result).toString();
-};
-
-
 const uniABI = [
     {
         constant: true,
@@ -143,8 +129,37 @@ const uniABI = [
     }
 ];
 
-const uniLPPrefix = "UNILP";
-const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
+interface LockedResult {
+    balance: string;
+    balanceNormal: number;
+    balanceUSD: number;
+    address: string;
+}
+
+// *************** HELPER FUNCTIONS ********** //
+
+
+const getEthBalance = async (address: string): Promise<string> => {
+    return await w3.eth.getBalance(address);
+};
+
+const getErcSupply = async (token: string): Promise<string> => {
+    const contract = new w3.eth.Contract(erc20ABI, token);
+
+    const result = await contract.methods.totalSupply().call();
+
+    return w3.utils.toBN(result).toString();
+};
+
+const getErcBalance = async (address: string, token: string): Promise<string> => {
+
+    const contract = new w3.eth.Contract(erc20ABI, token);
+
+    const result = await contract.methods.balanceOf(address).call();
+
+    return w3.utils.toBN(result).toString();
+};
+
 
 const ethPrice = async (): Promise<string> => {
     const price = await fetch(coinGeckoUrl + new URLSearchParams({
@@ -172,14 +187,6 @@ const getUniPrice = async (address: string) => {
     return price.toString();
 };
 
-
-interface LockedResult {
-    balance: string;
-    balanceNormal: number;
-    balanceUSD: number;
-    address: string;
-}
-
 const updateDbPriceNew = async (db, symbol, price) => {
     await db.collection("token_price").updateOne(
         {"symbol": symbol},
@@ -199,6 +206,8 @@ const updateDbPrice = async (db, address, price) => {
                 throw new Error(`Failed to update price: ${err}`);
             });
 };
+
+// *************** MAIN ********** //
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 

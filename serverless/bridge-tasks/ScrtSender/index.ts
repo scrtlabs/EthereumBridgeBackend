@@ -4,6 +4,27 @@ import Web3 from "web3";
 import {Contract} from "web3-eth-contract/types";
 import {SigningCosmWasmClient, Secp256k1Pen, BroadcastMode} from "secretjs";
 
+// *************** ENVIRONMENT VARIABLES  ********** //
+
+const secretNodeUrl = process.env["secretNodeURL"];
+const mongoDbName = process.env["mongodbNameBridge"];
+const mongodbUrl = process.env["mongodbUrlBridge"];
+const multisigAddress = process.env["MultisigAddress"];
+const pizzaAmount = `${process.env["pizzaAmount"]}`;
+const faucet = {
+    mnemonic: `${process.env["faucetMnemonic"]}`,
+    address: `${process.env["faucetAddress"]}`
+};
+const w3 = new Web3(process.env["EthProvider"]);
+// we don't really send anything encrypted, so this doesn't matter
+const seed = Uint8Array.from([
+    45, 252, 210, 141,  45, 110, 235, 100,
+    69, 230, 209,  79, 247,  18,   0,  12,
+    103, 160, 163, 178,   5,  52, 131, 242,
+    102, 148, 214, 132, 243, 222,  97,   4
+]);
+// *************** INTERFACES  ********** //
+
 const erc20ABI = [
     {
         "anonymous": false,
@@ -57,25 +78,13 @@ const erc20ABI = [
     }
 ];
 
-// we don't really send anything encrypted, so this doesn't matter
-const seed = Uint8Array.from([
-    45, 252, 210, 141,  45, 110, 235, 100,
-    69, 230, 209,  79, 247,  18,   0,  12,
-    103, 160, 163, 178,   5,  52, 131, 242,
-    102, 148, 214, 132, 243, 222,  97,   4
-]);
 
-const faucet = {
-    mnemonic: `${process.env["faucetMnemonic"]}`,
-    address: `${process.env["faucetAddress"]}`
-};
-
-const pizzaAmount = `${process.env["pizzaAmount"]}`;
+// *************** HELPER FUNCTIONS ********** //
 
 
 const sendScrt = async (address: string) => {
     const pen = await Secp256k1Pen.fromMnemonic(faucet.mnemonic);
-    const client = new SigningCosmWasmClient(`${process.env["secretNodeURL"]}`, faucet.address, (signBytes) => pen.sign(signBytes),
+    const client = new SigningCosmWasmClient(secretNodeUrl, faucet.address, (signBytes) => pen.sign(signBytes),
         seed,
         {
             send: {
@@ -88,7 +97,7 @@ const sendScrt = async (address: string) => {
     await client.sendTokens(address, [{amount: pizzaAmount, denom: "uscrt"}]);
 };
 
-const w3 = new Web3(process.env["EthProvider"]);
+
 
 const getAddressFromEvents = async (contract: Contract, name: string, fromBlock: number, toBlock: number): Promise<string[]> => {
     return (await contract.getPastEvents(name, {fromBlock: fromBlock, toBlock: toBlock})).map(
@@ -107,17 +116,19 @@ const getNewSwapAddresses = async (address: string, fromBlock: number, toBlock: 
     return allAddresses.map(addr => Buffer.from(addr.substring(2), "hex").toString());
 };
 
+// *************** MAIN ********** //
+
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
-    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
+    const client: MongoClient = await MongoClient.connect(mongodbUrl,
         { useUnifiedTopology: true, useNewUrlParser: true }).catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to connect to database");
         }
     );
-    const db = await client.db(`${process.env["mongodbName"]}`);
+    const db = await client.db(mongoDbName);
 
     const fromBlock: number = await db.collection("swap_tracker_object").findOne({src: "scrt_sender"}).then(
         value => value.nonce
@@ -136,7 +147,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         throw new Error("Failed to get start value from swap tracker");
     }
 
-    const addresses = await getNewSwapAddresses(`${process.env["MultisigAddress"]}`, fromBlock, currentBlock);
+    const addresses = await getNewSwapAddresses(multisigAddress, fromBlock, currentBlock);
 
     context.log(`debug: addresses ${JSON.stringify(addresses)}`);
 

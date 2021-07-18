@@ -4,14 +4,20 @@ import fetch from "node-fetch";
 import {priceFromPoolInScrt} from "./utils";
 import {BroadcastMode, CosmWasmClient} from "secretjs";
 
+// *************** ENVIRONMENT VARIABLES  ********** //
+
+
 const sefiAddress = process.env["sefiAddress"] || "secret12q2c5s5we5zn9pq43l0rlsygtql6646my0sqfm";
 const sefiPairAddress = process.env["sefiPairAddress"] || "secret1l56ke78aj9jxr4wu64h4rm20cnqxevzpf6tmfc";
-const binanceUrl = "https://api.binance.com/api/v3/ticker/price?";
-const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
 const uiDbUri = process.env["mongodbUrlUi"];
 const uiDbName = process.env["mongodbNameUi"];
 const bridgeDbName = process.env["mongodbNameBridge"];
 const bridgeDbUri = process.env["mongodbUrlBridge"];
+
+// *************** CONSTANTS  ********** //
+
+const binanceUrl = "https://api.binance.com/api/v3/ticker/price?";
+const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
 
 // this isn't actually secret
 const seed = Uint8Array.from([
@@ -20,6 +26,20 @@ const seed = Uint8Array.from([
     103, 160, 163, 178,   5,  52, 131, 242,
     102, 148, 214, 132, 243, 222,  97,   4
 ]);
+const uniLPPrefix = "UNILP";
+
+// *************** INTERFACES  ********** //
+
+interface PriceResult {
+    price: string;
+    symbol: string;
+}
+
+interface PriceOracle {
+    getPrices: (symbols: string[]) => Promise<PriceResult[]>;
+}
+
+// *************** HELPER FUNCTIONS  ********** //
 
 
 const getSecretJs = (): CosmWasmClient => {
@@ -50,6 +70,11 @@ const getScrtPrice = async (): Promise<number> => {
     }
 };
 
+const priceRelativeToUSD = (priceBTC: string, priceRelative: string): string => {
+    return String(parseFloat(priceBTC) * parseFloat(priceRelative));
+};
+
+// *************** ORACLES  ********** //
 
 
 class SecretSwapOracle implements PriceOracle {
@@ -101,13 +126,6 @@ class SecretSwapOracle implements PriceOracle {
     }
 }
 
-interface PriceOracle {
-    getPrices: (symbols: string[]) => Promise<PriceResult[]>;
-}
-
-const priceRelativeToUSD = (priceBTC: string, priceRelative: string): string => {
-    return String(parseFloat(priceBTC) * parseFloat(priceRelative));
-};
 
 class ConstantPriceOracle implements PriceOracle {
 
@@ -278,16 +296,11 @@ class CoinGeckoOracle implements PriceOracle {
     }
 }
 
+// *************** MAIN  ********** //
 
-interface PriceResult {
-    price: string;
-    symbol: string;
-}
 
 // disabling new BinancePriceOracle till we figure out the DAI stuff
 const oracles: PriceOracle[] = [new CoinGeckoOracle, new ConstantPriceOracle, new SecretSwapOracle];
-
-const uniLPPrefix = "UNILP";
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
