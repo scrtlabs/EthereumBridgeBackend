@@ -83,21 +83,20 @@ export const GetContractCodeHash = async (params: {
 
 export const priceFromPoolInScrt = async (secretjs: CosmWasmClient,
                                           address: string,
-                                          pair: string,
-                                          context?: any): Promise<number> => {
+                                          pair: string): Promise<number> => {
 
     const inputAmount = "1000000";
     const contractHash = await GetContractCodeHash({secretjs, address});
 
-    if (context) {
-        context.log(`got contract hash: ${contractHash}`);
-    }
+    // if (context) {
+    //     context.log(`got contract hash: ${contractHash}`);
+    // }
 
     const input = {contractHash, address, amount: inputAmount};
 
 
     // eslint-disable-next-line @typescript-eslint/camelcase
-    const { return_amount } = await handleSimulation(secretjs, input, pair, context);
+    const { return_amount } = await handleSimulation(secretjs, input, pair);
 
     return Number(return_amount) / 1000000;
 };

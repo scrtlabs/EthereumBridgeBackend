@@ -87,15 +87,15 @@ class SecretSwapOracle implements PriceOracle {
         return this.symbolMap[symbol.toUpperCase()];
     }
 
-    async getPrices(symbols: string[], context?: any): Promise<PriceResult[]> {
+    async getPrices(symbols: string[]): Promise<PriceResult[]> {
 
         const secretjs = getSecretJs();
         let priceScrt;
         try {
             priceScrt = await getScrtPrice();
-            if (context) {
-                context.log(`scrt price: ${priceScrt}`);
-            }
+            // if (context) {
+            //     context.log(`scrt price: ${priceScrt}`);
+            // }
         } catch (e) {
             throw new Error("failed to get scrt price from coingecko");
         }
@@ -104,7 +104,7 @@ class SecretSwapOracle implements PriceOracle {
             symbols.map(async (symbol): Promise<PriceResult> => {
 
                 const swapAddress = this.symbolToID(symbol);
-                context.log(`Got swap address: ${JSON.stringify(swapAddress)}`);
+                //context.log(`Got swap address: ${JSON.stringify(swapAddress)}`);
                 if (!swapAddress) {
                     return {
                         symbol,
@@ -112,8 +112,8 @@ class SecretSwapOracle implements PriceOracle {
                     };
                 }
 
-                const priceRelative = await priceFromPoolInScrt(secretjs, swapAddress.address, swapAddress.pair, context);
-                context.log(`Got relative price: ${JSON.stringify(priceRelative)}`);
+                const priceRelative = await priceFromPoolInScrt(secretjs, swapAddress.address, swapAddress.pair);
+                //context.log(`Got relative price: ${JSON.stringify(priceRelative)}`);
                 return {
                     symbol: symbol,
                     price: String(priceScrt * priceRelative)
