@@ -177,7 +177,7 @@ export const finalizeVote = async (req: Request, res: Response) => {
         address: newVoteAddr,
       },
       {
-        ended: voteInfo.config.finalized,
+        finalized: voteInfo.config.finalized,
         valid: voteInfo.config.valid,
         status: voteStatus,
       }
@@ -212,13 +212,15 @@ const queryTally = () => {
 };
 
 const getStatus = (tally: Tally): VoteStatus => {
+  const choices = tally.choices.map(c => c.toLowerCase());
+
   if (
-    tally.choices.includes("no") &&
-    tally.choices.includes("yes") &&
-    tally.choices.length === 2
+    choices.includes("no") &&
+    choices.includes("yes") &&
+    choices.length === 2
   ) {
-    const no_tally = Number(tally.tally[tally.choices.indexOf("no")]);
-    const yes_tally = Number(tally.tally[tally.choices.indexOf("yes")]);
+    const no_tally = Number(tally.tally[choices.indexOf("no")]);
+    const yes_tally = Number(tally.tally[choices.indexOf("yes")]);
 
     if (yes_tally <= no_tally) {
       return VoteStatus.Failed;
