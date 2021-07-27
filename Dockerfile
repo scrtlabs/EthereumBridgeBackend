@@ -13,7 +13,6 @@ RUN npm ci --quiet && npm run build
 
 FROM node:latest as build
 
-#
 # Production stage.
 # This state compile get back the JavaScript code from builder stage
 # It will also install the production package only
