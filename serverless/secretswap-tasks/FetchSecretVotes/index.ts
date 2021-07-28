@@ -130,6 +130,7 @@ const timerTrigger: AzureFunction = async function (
   });
 
   await sleep(30000); // Give the asynchronous logs time to print
+  await mongoClient.close();
 };
 
 const createMongoClient = function (context: Context): Promise<MongoClient> {
