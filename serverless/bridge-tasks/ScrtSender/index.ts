@@ -140,24 +140,29 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     context.log(`debug: addresses ${JSON.stringify(addresses)}`);
 
-    for (const addr of addresses) {
-        const found = await db.collection("scrt_tip_addresses").findOne({address: addr});
-        context.log(`debug: found new address ${found}`);
-        if (!found) {
-            context.log(`debug: sending to ${addr}`);
-            await sendScrt(addr);
+    try {
+        for (const addr of addresses) {
+            const found = await db.collection("scrt_tip_addresses").findOne({address: addr});
+            context.log(`debug: found new address ${found}`);
+            if (!found) {
+                context.log(`debug: sending to ${addr}`);
+                await sendScrt(addr);
 
-            await db.collection("scrt_tip_addresses").save({address: addr});
-            context.log(`debug: sent to ${addr} and saved in db successfully`);
-        } else {
-            context.log(`debug: already sent to address ${addr}`);
+                await db.collection("scrt_tip_addresses").save({address: addr});
+                context.log(`debug: sent to ${addr} and saved in db successfully`);
+            } else {
+                context.log(`debug: already sent to address ${addr}`);
+            }
         }
+
+        await db.collection("swap_tracker_object").updateOne({src: "scrt_sender"}, { $set: { nonce: currentBlock }});
+
+    } finally {
+        await client.close();
+        const timeStamp = new Date().toISOString();
+        context.log("JavaScript timer trigger function ran!", timeStamp);
     }
 
-    await db.collection("swap_tracker_object").updateOne({src: "scrt_sender"}, { $set: { nonce: currentBlock }});
-    await client.close();
-    const timeStamp = new Date().toISOString();
-    context.log("JavaScript timer trigger function ran!", timeStamp);
 };
 
 export default timerTrigger;
