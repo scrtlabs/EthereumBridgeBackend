@@ -21,9 +21,9 @@ class ConstantPriceOracle implements PriceOracle {
     }
 
     async getPrices(symbols: string[]): Promise<PriceResult[]> {
-        let resp = symbols.map((symbol): PriceResult => {
+        const resp = symbols.map((symbol): PriceResult => {
 
-            let price = this.priceMap[symbol]
+            const price = this.priceMap[symbol];
             if (!price) {
                 return {
                     symbol,
@@ -190,7 +190,7 @@ interface PriceResult {
 // disabling new BinancePriceOracle till we figure out the DAI stuff
 const oracles: PriceOracle[] = [new CoinGeckoOracle, new ConstantPriceOracle];
 
-const uniLPPrefix = 'UNILP'
+const uniLPPrefix = "UNILP";
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
@@ -204,8 +204,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     const db = await client.db(`${process.env["mongodbName"]}`);
 
     const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
-        (err: any) => {
+        async (err: any) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to get tokens from collection");
         }
     );
@@ -216,20 +217,25 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     // the split '(' handles the (BSC) tokens
     try {
          symbols = tokens
-             .map(t => t.display_props.symbol.split('(')[0])
+             .map(t => t.display_props.symbol.split("(")[0])
              .filter(t => !t.startsWith(uniLPPrefix))
              .filter(t => !t.startsWith("SEFI"));
     } catch (e) {
         context.log(e);
+        await client.close();
         throw new Error("Failed to get symbol for token");
     }
 
-    let prices: PriceResult[][] = await Promise.all(oracles.map(
-        async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
-    ));
-    context.log(symbols);
-    let average_prices: PriceResult[] = [];
-    
+    const averagePrices: PriceResult[] = [];
+    let prices: PriceResult[][];
+    try {
+        prices = await Promise.all(oracles.map(
+            async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
+        ));
+        context.log(symbols);
+    } catch (e) {
+        await client.close();
+    }
 
     for (const symbol of symbols) {
 
@@ -245,7 +251,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             });
         });
         //context.log(`${symbol} - ${total}:${length}`);
-        average_prices.push({
+        averagePrices.push({
             symbol,
             price: (total / length).toFixed(4),
         });
@@ -256,11 +262,12 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     //context.log(average_prices);
 
     await Promise.all(
-        average_prices.map(async p => {
-            await db.collection("token_pairing").updateOne({"display_props.symbol": new RegExp(p.symbol, 'i')}, { $set: { price: p.price }});
+        averagePrices.map(async p => {
+            await db.collection("token_pairing").updateOne({"display_props.symbol": new RegExp(p.symbol, "i")}, { $set: { price: p.price }});
         })).catch(
-        (err) => {
+        async (err) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to fetch price");
         });
     await client.close();

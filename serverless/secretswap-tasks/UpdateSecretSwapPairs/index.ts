@@ -6,7 +6,7 @@ const secretNodeURL: string = process.env["secretNodeURL"];
 const mongodbName: string = process.env["mongodbName"];
 const mongodbUrl: string = process.env["mongodbUrl"];
 const factoryContract: string = process.env["factoryContract"];
-const pairCodeId: number = Number(process.env["pairCodeId"]);
+const pairCodeId = Number(process.env["pairCodeId"]);
 
 const timerTrigger: AzureFunction = async function (
   context: Context,
@@ -34,13 +34,13 @@ const timerTrigger: AzureFunction = async function (
       .filter((addr) => !pairsInDb.has(addr));
   } catch (e) {
     context.log("secretjs error on getContracts:", e.message);
-    client.close();
+   await client.close();
     return;
   }
 
   if (pairsAddressesNotInDb.length === 0) {
     context.log("No new pairs.");
-    client.close();
+   await client.close();
     return;
   }
 
@@ -58,7 +58,7 @@ const timerTrigger: AzureFunction = async function (
     });
   } catch (e) {
     context.log("secretjs error on queryContractSmart:", e.message);
-    client.close();
+   await client.close();
     return;
   }
 
@@ -68,7 +68,7 @@ const timerTrigger: AzureFunction = async function (
   } catch (e) {
     context.log("mongodb error on insertMany:", e.message);
   } finally {
-    client.close();
+   await client.close();
   }
 };
 

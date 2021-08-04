@@ -112,16 +112,18 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
         { useUnifiedTopology: true, useNewUrlParser: true }).catch(
-        (err: any) => {
+        async (err: any) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to connect to database");
         }
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
     const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
-        (err: any) => {
+        async (err: any) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to get tokens from collection");
         }
     );
@@ -139,6 +141,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
              //.filter(t => t.toLowerCase().startsWith("sefi"));
     } catch (e) {
         context.log(e);
+        await client.close();
         throw new Error("Failed to get symbol for token");
     }
     context.log(`sefi token symbol: ${symbols}`);
@@ -178,8 +181,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
             }
         })).catch(
-        (err) => {
+        async (err) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to fetch price");
         });
     await client.close();

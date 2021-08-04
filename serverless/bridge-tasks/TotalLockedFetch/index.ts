@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb";
 import Web3 from "web3";
 import fetch from "node-fetch";
 
-const supportedNetworks = ["ethereum", "binancesmartchain"]
+const supportedNetworks = ["ethereum", "binancesmartchain"];
 
 const erc20ABI = [
     {
@@ -139,9 +139,9 @@ const uniABI = [
         payable: false,
         type: "function" as "function"
     }
-]
+];
 
-const uniLPPrefix = 'UNILP'
+const uniLPPrefix = "UNILP";
 const coinGeckoUrl = "https://api.coingecko.com/api/v3/simple/price?";
 
 const ethPrice = async (): Promise<string> => {
@@ -150,7 +150,7 @@ const ethPrice = async (): Promise<string> => {
         // eslint-disable-next-line @typescript-eslint/camelcase
         vs_currencies: "USD"
     }));
-    return (await price.json())["ethereum"].usd
+    return (await price.json())["ethereum"].usd;
 };
 
 // this only works for ETH pairs... todo: generalize it when we want to reward other pools
@@ -186,22 +186,24 @@ const updateDbPrice = async (db, address, price) => {
             (err) => {
                 throw new Error(`Failed to update price: ${err}`);
             });
-}
+};
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 
     const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
         { useUnifiedTopology: true, useNewUrlParser: true }).catch(
-        (err: any) => {
+        async (err: any) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to connect to database");
         }
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
     const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
-        (err: any) => {
+        async (err: any) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to get tokens from collection");
         }
     );
@@ -236,8 +238,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
             return {address: token.src_address, balance, balanceNormal, balanceUSD};
     })).catch(
-        (err) => {
+        async (err) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to fetch balance");
     });
 
@@ -254,8 +257,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                         }
                 });
         })).catch(
-        (err) => {
+        async (err) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to fetch price");
         });
 

@@ -9,10 +9,10 @@ import { CosmWasmClient } from "secretjs";
 const secretNodeURL: string = process.env["secretNodeURL"];
 const mongodbName: string = process.env["mongodbName"];
 const mongodbUrl: string = process.env["mongodbUrl"];
-const voteCodeId: number = Number(process.env["voteCodeId"]);
+const voteCodeId = Number(process.env["voteCodeId"]);
 const voteFactoryAddr: string = process.env["voteFactoryAddr"];
 
-const votesCollection: string = "secret_votes";
+const votesCollection = "secret_votes";
 
 enum VoteStatus {
   InProgress = "IN PROGRESS",
@@ -37,7 +37,7 @@ interface Vote {
   reveal_com: {
     n: number;
     revealers: string[];
-  }
+  };
 }
 
 interface VoteInfo {
@@ -62,12 +62,18 @@ interface VoteInfo {
   };
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
 ): Promise<void> {
   const queryClient = new CosmWasmClient(secretNodeURL);
-  let voteContracts = await queryClient.getContracts(voteCodeId);
+  const voteContracts = await queryClient.getContracts(voteCodeId);
 
   const mongoClient = await createMongoClient(context);
   const dbCollection: Collection<Vote> = mongoClient
@@ -129,7 +135,7 @@ const timerTrigger: AzureFunction = async function (
     );
   });
 
-  await sleep(30000); // Give the asynchronous logs time to print
+  await sleep(3000); // Give the asynchronous logs time to print
   await mongoClient.close();
 };
 
@@ -148,11 +154,5 @@ const createMongoClient = function (context: Context): Promise<MongoClient> {
 const queryInfo = function () {
   return { vote_info: {} };
 };
-
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 export default timerTrigger;
