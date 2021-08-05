@@ -64,6 +64,12 @@ const config = convict({
     arg: "secretNodeUrl",
     env: "SECRET_NODE_URL",
   },
+  governancePoolAddr: {
+      format: String,
+      default: "",
+      arg: "governancePoolAddr",
+      env: "GOVERNANCE_POOL_ADDR",
+  },
 });
 
 const env = config.get("env");
