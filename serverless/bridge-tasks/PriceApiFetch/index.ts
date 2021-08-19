@@ -229,7 +229,7 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
         prices = await Promise.all(oracles.map(
             async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
         ));
-        context.log(symbols);
+        context.log(prices);
     } catch (e) {
         await client.close();
     }
@@ -256,7 +256,7 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
     }
 
 
-    //context.log(average_prices);
+    context.log(averagePrices);
 
     return Promise.all(
         averagePrices.map(async p => {
