@@ -153,8 +153,15 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             throw new Error("Failed to get tokens from collection");
         }
     );
+    const secretTokens = await db.collection("secret_tokens").find({}).limit(100).toArray().catch(
+        (err: any) => {
+            context.log(err);
+            throw new Error("Failed to get tokens from collection");
+        }
+    );
 
     tokens = tokens.concat(bscTokens);
+    tokens = tokens.concat(secretTokens);
 
     console.log(`${JSON.stringify(tokens)}`)
 
