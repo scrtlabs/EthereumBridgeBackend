@@ -190,20 +190,13 @@ interface PriceResult {
 // disabling new BinancePriceOracle till we figure out the DAI stuff
 const oracles: PriceOracle[] = [new CoinGeckoOracle, new ConstantPriceOracle];
 
-const uniLPPrefix = 'UNILP'
+const uniLPPrefix = 'UNILP';
 
-const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
+const LPPrefix = 'lp';
 
-    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
-        { useUnifiedTopology: true, useNewUrlParser: true }).catch(
-        (err: any) => {
-            context.log(err);
-            throw new Error("Failed to connect to database");
-        }
-    );
-    const db = await client.db(`${process.env["mongodbName"]}`);
+const fetchPrices = async function (context: Context, db, collectionName: String): Promise<void[]> {
 
-    const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
+    const tokens = await db.collection(collectionName).find({}).limit(100).toArray().catch(
         (err: any) => {
             context.log(err);
             throw new Error("Failed to get tokens from collection");
@@ -217,17 +210,19 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     try {
          symbols = tokens
              .map(t => t.display_props.symbol.split('(')[0])
+             .filter(t => !t.startsWith(LPPrefix))
              .filter(t => !t.startsWith(uniLPPrefix))
              .filter(t => !t.startsWith("SEFI"));
     } catch (e) {
         context.log(e);
         throw new Error("Failed to get symbol for token");
     }
+    
+    context.log(symbols);
 
     let prices: PriceResult[][] = await Promise.all(oracles.map(
         async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
     ));
-    context.log(symbols);
     let average_prices: PriceResult[] = [];
     
 
@@ -255,14 +250,33 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
     //context.log(average_prices);
 
-    await Promise.all(
+    return Promise.all(
         average_prices.map(async p => {
-            await db.collection("token_pairing").updateOne({"display_props.symbol": new RegExp(p.symbol, 'i')}, { $set: { price: p.price }});
+            await db.collection(collectionName).updateOne({"display_props.symbol": new RegExp(p.symbol, 'i')}, { $set: { price: p.price }});
         })).catch(
         (err) => {
             context.log(err);
             throw new Error("Failed to fetch price");
         });
+
+    // const timeStamp = new Date().toISOString();
+    // context.log("JavaScript timer trigger function ran!", timeStamp);
+}
+
+const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
+
+    const client: MongoClient = await MongoClient.connect(`${process.env["mongodbUrl"]}`,
+        { useUnifiedTopology: true, useNewUrlParser: true }).catch(
+        (err: any) => {
+            context.log(err);
+            throw new Error("Failed to connect to database");
+        }
+    );
+    const db = await client.db(`${process.env["mongodbName"]}`);
+
+    await fetchPrices(context, db, "token_pairing");
+    await fetchPrices(context, db, "secret_tokens");
+
     await client.close();
 
     // const timeStamp = new Date().toISOString();
