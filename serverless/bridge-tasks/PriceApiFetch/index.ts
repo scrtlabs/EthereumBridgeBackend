@@ -260,7 +260,7 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
 
     return Promise.all(
         averagePrices.map(async p => {
-            await db.collection(collectionName).updateOne({"display_props.symbol": new RegExp(p.symbol, 'i'), "id": new RegExp("^(?!lp).*") /* id not starting with "lp" */}, { $set: { price: p.price }});
+            await db.collection(collectionName).updateOne({"display_props.symbol": new RegExp(`^(?!${LPPrefix}).*${p.symbol}`, 'i')}, { $set: { price: p.price }});
         })).catch(
         async (err) => {
             context.log(err);
