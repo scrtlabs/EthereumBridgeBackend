@@ -8,7 +8,7 @@ import fetch from "node-fetch";
 
 const coinGeckoApi = "https://api.coingecko.com/api/v3/simple/price?";
 
-const futureBlock = process.env["futureBlock"] || 10_000_000;
+const futureBlock =  parseInt(process.env["futureBlock"]) || 10_000_000;
 const LPPrefix = "LP-";
 const MASTER_CONTRACT = process.env["masterStakingContract"] || "secret13hqxweum28nj0c53nnvrpd23ygguhteqggf852";
 
