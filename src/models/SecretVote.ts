@@ -24,6 +24,7 @@ export interface VoteDocument extends mongoose.Document {
     n: number;
     revealers: string[];
   }
+  voting_percentage?: number;
 }
 
 export const VoteSchema = new Schema(
@@ -45,6 +46,7 @@ export const VoteSchema = new Schema(
       n: { type: Number, required: true },
       revealers: { type: [String], required: true },
     },
+    voting_percentage: { type: Number, required: false }
   },
   { collection: "secret_votes" }
 );

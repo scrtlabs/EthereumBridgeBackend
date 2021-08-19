@@ -31,6 +31,10 @@ interface Tally {
   tally: string[];
 }
 
+interface TotalLockedResponse {
+  amount: number;
+}
+
 export const getAllVotes = async (req: Request, res: Response) => {
   try {
     const votes = await SecretVotes.find();
@@ -149,6 +153,7 @@ export const finalizeVote = async (req: Request, res: Response) => {
   }
 
   let voteStatus: VoteStatus;
+  let voting_percentage: number;
   if (!voteInfo.config.valid) {
     voteStatus = VoteStatus.Failed;
   } else {
@@ -169,6 +174,22 @@ export const finalizeVote = async (req: Request, res: Response) => {
     }
 
     voteStatus = getStatus(tally_resp.tally);
+
+    let locked_resp: { total_locked: TotalLockedResponse };
+    try {
+      locked_resp = await queryClient.queryContractSmart(config.governancePoolAddr, queryTotalLocked());
+    } catch (err) {
+      const error = `Error querying tally for ${newVoteAddr}`;
+      logger.error(error);
+      logger.error(JSON.stringify(err));
+
+      res.status(400);
+      res.send({ result: error, error: JSON.stringify(err) });
+      return;
+    }
+
+    const total_votes: number = tally_resp.tally.tally.map(c => parseInt(c)).reduce((acc, c) => acc + c);
+    voting_percentage = (total_votes / locked_resp.total_locked.amount) * 100;
   }
 
   try {
@@ -180,6 +201,7 @@ export const finalizeVote = async (req: Request, res: Response) => {
         finalized: voteInfo.config.finalized,
         valid: voteInfo.config.valid,
         status: voteStatus,
+        voting_percentage: voting_percentage,
       }
     ).orFail();
 
@@ -209,6 +231,10 @@ const queryVoteInfo = () => {
 
 const queryTally = () => {
   return { tally: {} };
+};
+
+const queryTotalLocked = () => {
+  return { total_locked: {} };
 };
 
 const getStatus = (tally: Tally): VoteStatus => {

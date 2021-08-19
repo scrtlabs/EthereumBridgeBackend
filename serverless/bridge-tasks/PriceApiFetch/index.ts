@@ -21,9 +21,9 @@ class ConstantPriceOracle implements PriceOracle {
     }
 
     async getPrices(symbols: string[]): Promise<PriceResult[]> {
-        let resp = symbols.map((symbol): PriceResult => {
+        const resp = symbols.map((symbol): PriceResult => {
 
-            let price = this.priceMap[symbol]
+            const price = this.priceMap[symbol];
             if (!price) {
                 return {
                     symbol,
@@ -194,11 +194,12 @@ const uniLPPrefix = 'UNILP';
 
 const LPPrefix = 'lp';
 
-const fetchPrices = async function (context: Context, db, collectionName: String): Promise<void[]> {
+const fetchPrices = async function (context: Context, db, client: MongoClient, collectionName: String): Promise<void[]> {
 
     const tokens = await db.collection(collectionName).find({}).limit(100).toArray().catch(
-        (err: any) => {
+        async (err: any) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to get tokens from collection");
         }
     );
@@ -215,16 +216,22 @@ const fetchPrices = async function (context: Context, db, collectionName: String
              .filter(t => !t.startsWith("SEFI"));
     } catch (e) {
         context.log(e);
+        await client.close();
         throw new Error("Failed to get symbol for token");
     }
     
     context.log(symbols);
 
-    let prices: PriceResult[][] = await Promise.all(oracles.map(
-        async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
-    ));
-    let average_prices: PriceResult[] = [];
-    
+    const averagePrices: PriceResult[] = [];
+    let prices: PriceResult[][];
+    try {
+        prices = await Promise.all(oracles.map(
+            async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
+        ));
+        context.log(symbols);
+    } catch (e) {
+        await client.close();
+    }
 
     for (const symbol of symbols) {
 
@@ -240,7 +247,7 @@ const fetchPrices = async function (context: Context, db, collectionName: String
             });
         });
         //context.log(`${symbol} - ${total}:${length}`);
-        average_prices.push({
+        averagePrices.push({
             symbol,
             price: (total / length).toFixed(4),
         });
@@ -251,11 +258,12 @@ const fetchPrices = async function (context: Context, db, collectionName: String
     //context.log(average_prices);
 
     return Promise.all(
-        average_prices.map(async p => {
+        averagePrices.map(async p => {
             await db.collection(collectionName).updateOne({"display_props.symbol": new RegExp(p.symbol, 'i')}, { $set: { price: p.price }});
         })).catch(
-        (err) => {
+        async (err) => {
             context.log(err);
+            await client.close();
             throw new Error("Failed to fetch price");
         });
 
@@ -274,8 +282,8 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
-    await fetchPrices(context, db, "token_pairing");
-    await fetchPrices(context, db, "secret_tokens");
+    await fetchPrices(context, db, client, "token_pairing");
+    await fetchPrices(context, db, client, "secret_tokens");
 
     await client.close();
 
