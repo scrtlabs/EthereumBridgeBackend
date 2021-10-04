@@ -225,9 +225,11 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 let pendingRewards;
                 let incBalance;
                 if (pool.deprecated) {
+                    context.log("deprecated");
                     pendingRewards = "0";
                     incBalance = (await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKeySpy"]}`))).balance.amount;
                 } else {
+                    context.log("not deprecated");
                     pendingRewards = (await queryClient.queryContractSmart(MASTER_CONTRACT, queryMasterContractPendingRewards(poolAddr))).pending.amount;
                     incBalance = (await queryClient.queryContractSmart(poolAddr, queryTotalLocked())).total_locked.amount;
                 }
