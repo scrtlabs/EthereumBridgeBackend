@@ -200,14 +200,26 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                     const rewardsBalance = await queryClient.queryContractSmart(poolAddr, queryRewardPool());
                     const incBalance = await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`));
                     const deadline = await queryClient.queryContractSmart(poolAddr, queryDeadline());
-                    const incTokenPrice = await (await fetch(coinGeckoApi + new URLSearchParams({
-                        vs_currencies: "usd",
-                        ids: pool.inc_token.name
-                    }))).json();
-                    const rewardTokenPrice = await (await fetch(coinGeckoApi + new URLSearchParams({
-                        vs_currencies: "usd",
-                        ids: pool.rewards_token.name
-                    }))).json();
+                    let incTokenPrice;
+                    try {
+                        incTokenPrice = await (await fetch(coinGeckoApi + new URLSearchParams({
+                            vs_currencies: "usd",
+                            ids: pool.inc_token.name
+                        }))).json();
+                    } catch (err) {
+                        context.log(`Failed to get price of ${pool.inc_token.name}: ${err}`);
+                        incTokenPrice = pool.inc_token.price;
+                    }
+                    let rewardTokenPrice;
+                    try {
+                        rewardTokenPrice = await (await fetch(coinGeckoApi + new URLSearchParams({
+                            vs_currencies: "usd",
+                            ids: pool.rewards_token.name
+                        }))).json();
+                    } catch (err) {
+                        context.log(`Failed to get price of ${pool.rewards_token.name}: ${err}`);
+                        rewardTokenPrice = pool.rewards_token.price;
+                    }
 
                     await db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
                         {
