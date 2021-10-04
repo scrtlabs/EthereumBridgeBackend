@@ -35,6 +35,7 @@ interface RewardPoolData {
     total_locked: string;
     pending_rewards: string;
     deadline: string;
+    deprecated: boolean;
 }
 
 function queryMasterContractPendingRewards(address: string) {
@@ -58,6 +59,12 @@ function queryTokenInfo() {
 function queryRewardPool() {
     return {
         reward_pool_balance: {}
+    };
+}
+
+function queryTotalLocked() {
+    return {
+        total_locked: {}
     };
 }
 
@@ -215,8 +222,15 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                     });
             } else {
                 context.log("new style rewards token, yay!");
-                const pendingRewards = await queryClient.queryContractSmart(MASTER_CONTRACT, queryMasterContractPendingRewards(poolAddr));
-                const incBalance = await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKeySpy"]}`));
+                let pendingRewards;
+                let incBalance;
+                if (pool.deprecated) {
+                    pendingRewards = "0";
+                    incBalance = (await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKeySpy"]}`))).balance.amount;
+                } else {
+                    pendingRewards = (await queryClient.queryContractSmart(MASTER_CONTRACT, queryMasterContractPendingRewards(poolAddr))).pending.amount;
+                    incBalance = (await queryClient.queryContractSmart(poolAddr, queryTotalLocked())).total_locked.amount;
+                }
 
                 context.log(`pending: ${JSON.stringify(pendingRewards)}`);
                 context.log(`inc balance: ${JSON.stringify(incBalance)}`);
@@ -229,8 +243,8 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 await db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
                     {
                         $set: {
-                            total_locked: incBalance.balance.amount,
-                            pending_rewards: pendingRewards.pending.amount,
+                            total_locked: incBalance,
+                            pending_rewards: pendingRewards,
                             deadline: futureBlock,
                             "inc_token.price": incTokenPrice,
                             "rewards_token.price": rewardTokenPrice
