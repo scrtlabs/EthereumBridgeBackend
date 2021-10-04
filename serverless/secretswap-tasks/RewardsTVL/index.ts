@@ -35,6 +35,7 @@ interface RewardPoolData {
     total_locked: string;
     pending_rewards: string;
     deadline: string;
+    deprecated: boolean;
 }
 
 function queryMasterContractPendingRewards(address: string) {
@@ -58,6 +59,12 @@ function queryTokenInfo() {
 function queryRewardPool() {
     return {
         reward_pool_balance: {}
+    };
+}
+
+function queryTotalLocked() {
+    return {
+        total_locked: {}
     };
 }
 
@@ -215,8 +222,15 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                     });
             } else {
                 context.log("new style rewards token, yay!");
-                const pendingRewards = await queryClient.queryContractSmart(MASTER_CONTRACT, queryMasterContractPendingRewards(poolAddr));
-                const incBalance = await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKeySpy"]}`));
+                let pendingRewards;
+                let incBalance;
+                if (pool.deprecated) {
+                    pendingRewards = "0";
+                    incBalance = await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKeySpy"]}`));
+                } else {
+                    pendingRewards = await queryClient.queryContractSmart(MASTER_CONTRACT, queryMasterContractPendingRewards(poolAddr));
+                    incBalance = await queryClient.queryContractSmart(poolAddr, queryTotalLocked());
+                }
 
                 context.log(`pending: ${JSON.stringify(pendingRewards)}`);
                 context.log(`inc balance: ${JSON.stringify(incBalance)}`);
