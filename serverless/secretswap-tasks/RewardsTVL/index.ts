@@ -194,68 +194,83 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
                 oldStylePool = false;
             }
 
-            if (oldStylePool) {
-                const [rewardsBalance, incBalance, deadline, incTokenPrice, rewardTokenPrice] = await Promise.all([
-                    queryClient.queryContractSmart(poolAddr, queryRewardPool()),
-                    queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`)),
-                    queryClient.queryContractSmart(poolAddr, queryDeadline()),
-                    (await fetch(coinGeckoApi + new URLSearchParams({
+            try {
+                if (oldStylePool) {
+                    
+                    const rewardsBalance = await queryClient.queryContractSmart(poolAddr, queryRewardPool());
+                    const incBalance = await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKey"]}`));
+                    const deadline = await queryClient.queryContractSmart(poolAddr, queryDeadline());
+                    const incTokenPrice = await (await fetch(coinGeckoApi + new URLSearchParams({
                         vs_currencies: "usd",
                         ids: pool.inc_token.name
-                    }))).json(),
-                    (await fetch(coinGeckoApi + new URLSearchParams({
+                    }))).json();
+                    const rewardTokenPrice = await (await fetch(coinGeckoApi + new URLSearchParams({
                         vs_currencies: "usd",
                         ids: pool.rewards_token.name
-                    }))).json()
+                    }))).json();
 
-                ]);
-
-                await db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
-                    {
-                        $set: {
-                            total_locked: incBalance.balance.amount,
-                            pending_rewards: rewardsBalance.reward_pool_balance.balance,
-                            deadline: deadline.end_height.height,
-                            "inc_token.price": incTokenPrice[pool.inc_token.name].usd,
-                            "rewards_token.price": rewardTokenPrice[pool.rewards_token.name].usd
-                        }
-                    });
-            } else {
-                context.log("new style rewards token, yay!");
-                let pendingRewards;
-                let incBalance;
-                if (pool.deprecated) {
-                    context.log("deprecated");
-                    pendingRewards = "0";
-                    incBalance = (await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKeySpy"]}`))).balance.amount;
+                    await db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
+                        {
+                            $set: {
+                                total_locked: incBalance.balance.amount,
+                                pending_rewards: rewardsBalance.reward_pool_balance.balance,
+                                deadline: deadline.end_height.height,
+                                "inc_token.price": incTokenPrice[pool.inc_token.name].usd,
+                                "rewards_token.price": rewardTokenPrice[pool.rewards_token.name].usd
+                            }
+                        });
+                
                 } else {
-                    context.log("not deprecated");
-                    pendingRewards = (await queryClient.queryContractSmart(MASTER_CONTRACT, queryMasterContractPendingRewards(poolAddr))).pending.amount;
-                    incBalance = (await queryClient.queryContractSmart(poolAddr, queryTotalLocked())).total_locked.amount;
+                    context.log("new style rewards token, yay!");
+                    let pendingRewards;
+                    let incBalance;
+                    if (pool.deprecated) {
+                        context.log("deprecated");
+                        pendingRewards = "0";
+                        incBalance = (await queryClient.queryContractSmart(incTokenAddr, querySnip20Balance(poolAddr, `${process.env["viewingKeySpy"]}`))).balance.amount;
+                    } else {
+                        context.log("not deprecated");
+                        pendingRewards = (await queryClient.queryContractSmart(MASTER_CONTRACT, queryMasterContractPendingRewards(poolAddr))).pending.amount;
+                        incBalance = (await queryClient.queryContractSmart(poolAddr, queryTotalLocked())).total_locked.amount;
+                    }
+
+                    context.log(`pending: ${JSON.stringify(pendingRewards)}`);
+                    context.log(`inc balance: ${JSON.stringify(incBalance)}`);
+                    
+                    let rewardTokenPrice;
+                    try {
+                        rewardTokenPrice = await getPriceForSymbol(queryClient, pool.rewards_token.address, pool.rewards_token.symbol, tokens, pairs);
+                        context.log(`rewards token price ${rewardTokenPrice}`);
+                    } catch (err) {
+                        context.log(`Failed to get price of ${pool.rewards_token.symbol}: ${err}`);
+                        rewardTokenPrice = pool.rewards_token.price;
+                    }
+                    let incTokenPrice;
+                    try {
+                        incTokenPrice = await getPriceForSymbol(queryClient, incTokenAddr, pool.inc_token.symbol, tokens, pairs, context);
+                    } catch (err) {
+                        context.log(`Failed to get price of ${pool.inc_token.symbol}: ${err}`);
+                        incTokenPrice = pool.inc_token.price;
+                    }
+
+                    context.log(`inc token price ${incTokenPrice}`);
+
+                    await db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
+                        {
+                            $set: {
+                                total_locked: incBalance,
+                                pending_rewards: pendingRewards,
+                                deadline: futureBlock,
+                                "inc_token.price": incTokenPrice,
+                                "rewards_token.price": rewardTokenPrice
+                            }
+                        });
                 }
 
-                context.log(`pending: ${JSON.stringify(pendingRewards)}`);
-                context.log(`inc balance: ${JSON.stringify(incBalance)}`);
-                const rewardTokenPrice = await getPriceForSymbol(queryClient, pool.rewards_token.address, pool.rewards_token.symbol, tokens, pairs);
-                context.log(`rewards token price ${rewardTokenPrice}`);
-                const incTokenPrice = await getPriceForSymbol(queryClient, incTokenAddr, pool.inc_token.symbol, tokens, pairs, context);
-
-                context.log(`inc token price ${incTokenPrice}`);
-
-                await db.collection("rewards_data").updateOne({ "pool_address": poolAddr },
-                    {
-                        $set: {
-                            total_locked: incBalance,
-                            pending_rewards: pendingRewards,
-                            deadline: futureBlock,
-                            "inc_token.price": incTokenPrice,
-                            "rewards_token.price": rewardTokenPrice
-                        }
-                    });
-            }
-
             // Query chain for things needed to be updated
-
+            } catch (err) {
+                context.log(`Could not update rewards data of ${poolAddr}. Error: ${err}`);
+            }
         })
     ).catch(
         err => {
