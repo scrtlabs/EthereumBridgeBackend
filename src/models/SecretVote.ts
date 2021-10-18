@@ -47,7 +47,8 @@ export const VoteSchema = new Schema(
       n: { type: Number, required: true },
       revealers: { type: [String], required: true },
     },
-    voting_percentage: { type: Number, required: false }
+    voting_percentage: { type: Number, required: false },
+    tally: { type: [String], required: false }
   },
   { collection: "secret_votes" }
 );
