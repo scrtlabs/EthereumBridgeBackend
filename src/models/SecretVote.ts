@@ -25,6 +25,7 @@ export interface VoteDocument extends mongoose.Document {
     revealers: string[];
   }
   voting_percentage?: number;
+  tally?: string[];
 }
 
 export const VoteSchema = new Schema(

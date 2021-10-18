@@ -154,10 +154,10 @@ export const finalizeVote = async (req: Request, res: Response) => {
 
   let voteStatus: VoteStatus;
   let voting_percentage: number;
+  let tally_resp: { tally: Tally };
   if (!voteInfo.config.valid) {
     voteStatus = VoteStatus.Failed;
   } else {
-    let tally_resp: { tally: Tally };
     try {
       tally_resp = await queryClient.queryContractSmart(
         newVoteAddr,
@@ -201,7 +201,8 @@ export const finalizeVote = async (req: Request, res: Response) => {
         finalized: voteInfo.config.finalized,
         valid: voteInfo.config.valid,
         status: voteStatus,
-        voting_percentage: voting_percentage,
+        voting_percentage: voteStatus === VoteStatus.Passed ? voting_percentage : 0,
+        tally: voteStatus === VoteStatus.Passed ? tally_resp.tally.tally : []
       }
     ).orFail();
 
