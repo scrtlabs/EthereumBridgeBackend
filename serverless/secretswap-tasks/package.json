@@ -16,7 +16,6 @@
     "typescript": "^3.3.3"
   },
   "dependencies": {
-    "@cosmjs/math": "^0.26.4",
     "mongodb": "^3.6.6",
     "node-fetch": "^2.6.1",
     "secretjs": "^0.17.1"
