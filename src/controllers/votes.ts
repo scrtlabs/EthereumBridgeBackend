@@ -201,8 +201,8 @@ export const finalizeVote = async (req: Request, res: Response) => {
         finalized: voteInfo.config.finalized,
         valid: voteInfo.config.valid,
         status: voteStatus,
-        voting_percentage: voteStatus === VoteStatus.Passed ? voting_percentage : 0,
-        tally: voteStatus === VoteStatus.Passed ? tally_resp.tally.tally : []
+        voting_percentage: voteInfo.config.valid ? voting_percentage : 0,
+        tally: voteInfo.config.valid ? tally_resp.tally.tally : []
       }
     ).orFail();
 
