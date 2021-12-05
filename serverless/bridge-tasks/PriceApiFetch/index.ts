@@ -131,7 +131,8 @@ class CoinGeckoOracle implements PriceOracle {
         "BUNNY": "pancake-bunny",
         "SIENNA": "sienna-erc20",
         "WSIENNA": "sienna-erc20",
-        "XMR": "monero"
+        "XMR": "monero",
+        "WATOM": "cosmos"
     }
 
     symbolToID = symbol => {
@@ -191,11 +192,11 @@ interface PriceResult {
 // disabling new BinancePriceOracle till we figure out the DAI stuff
 const oracles: PriceOracle[] = [new CoinGeckoOracle, new ConstantPriceOracle];
 
-const uniLPPrefix = 'UNILP';
+const uniLPPrefix = "UNILP";
 
-const LPPrefix = 'lp';
+const LPPrefix = "lp";
 
-const fetchPrices = async function (context: Context, db, client: MongoClient, collectionName: String): Promise<void[]> {
+const fetchPrices = async function (context: Context, db, client: MongoClient, collectionName: string): Promise<void[]> {
 
     const tokens = await db.collection(collectionName).find({}).limit(100).toArray().catch(
         async (err: any) => {
@@ -211,7 +212,7 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
     // the split '(' handles the (BSC) tokens
     try {
          symbols = tokens
-             .map(t => t.display_props.symbol.split('(')[0])
+             .map(t => t.display_props.symbol.split("(")[0])
              .filter(t => !t.startsWith(LPPrefix))
              .filter(t => !t.startsWith(uniLPPrefix))
              .filter(t => !t.startsWith("SEFI"));
@@ -220,8 +221,6 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
         await client.close();
         throw new Error("Failed to get symbol for token");
     }
-    
-    context.log(symbols);
 
     const averagePrices: PriceResult[] = [];
     let prices: PriceResult[][];
@@ -229,7 +228,6 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
         prices = await Promise.all(oracles.map(
             async o => (await o.getPrices(symbols)).filter(p => !isNaN(Number(p.price)))
         ));
-        context.log(prices);
     } catch (e) {
         await client.close();
     }
@@ -255,12 +253,9 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
 
     }
 
-
-    context.log(averagePrices);
-
     return Promise.all(
         averagePrices.map(async p => {
-            await db.collection(collectionName).updateOne({"display_props.symbol": new RegExp(`^(?!${LPPrefix}).*${p.symbol}`, 'i')}, { $set: { price: p.price }});
+            await db.collection(collectionName).updateOne({"display_props.symbol": new RegExp(`^(?!${LPPrefix}).*${p.symbol}`, "i")}, { $set: { price: p.price }});
         })).catch(
         async (err) => {
             context.log(err);
@@ -270,7 +265,7 @@ const fetchPrices = async function (context: Context, db, client: MongoClient, c
 
     // const timeStamp = new Date().toISOString();
     // context.log("JavaScript timer trigger function ran!", timeStamp);
-}
+};
 
 const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
 

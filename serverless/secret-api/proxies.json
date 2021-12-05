@@ -4,7 +4,7 @@
     "RpcProxy": {
       "matchCondition": {
         "methods": [ "GET", "POST" ],
-        "route": "/secret-2/rpc/{*request}"
+        "route": "/secret-4/rpc/{*request}"
       },
       "requestOverrides": {
         "backend.request.headers.Accept": "application/json",
@@ -14,8 +14,8 @@
     },
     "LcdProxy": {
       "matchCondition": {
-        "methods": [ "GET", "POST" ],
-        "route": "/secret-2/lcd/{*request}"
+        "methods": [ "GET", "POST", "OPTIONS" ],
+        "route": "/secret-4/lcd/{*request}"
       },
       "requestOverrides": {
         "backend.request.headers.Accept": "application/json",
