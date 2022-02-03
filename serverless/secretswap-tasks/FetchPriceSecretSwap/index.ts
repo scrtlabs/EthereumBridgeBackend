@@ -139,7 +139,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     tokens.concat(secretTokens);
     context.log(tokens);
 
-    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI" || t?.display_props?.symbol === "ALTER");
+    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI" || t?.display_props?.symbol === "alter");
 
     context.log(sefiTokens);
 
@@ -189,6 +189,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         averagePrices.map(async p => {
             if (!isNaN(Number(p.price))) {
                 await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
+                await db.collection("secret_tokens").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
             }
         })).catch(
         async (err) => {
