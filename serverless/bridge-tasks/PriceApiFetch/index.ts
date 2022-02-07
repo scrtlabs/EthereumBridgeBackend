@@ -18,7 +18,6 @@ class ConstantPriceOracle implements PriceOracle {
     priceMap = {
         // SIENNA: "6.0",
         // WSIENNA: "6.0"
-        ALTER: "0.9"
     }
 
     async getPrices(symbols: string[]): Promise<PriceResult[]> {
@@ -133,7 +132,8 @@ class CoinGeckoOracle implements PriceOracle {
         "SIENNA": "sienna-erc20",
         "WSIENNA": "sienna-erc20",
         "XMR": "monero",
-        "WATOM": "cosmos"
+        "WATOM": "cosmos",
+        "ALTER": "alter",
     }
 
     symbolToID = symbol => {
