@@ -20,8 +20,6 @@ const seed = Uint8Array.from([
 
 const sefiAddress = `${process.env["sefiAddress"] || "secret12q2c5s5we5zn9pq43l0rlsygtql6646my0sqfm"}`;
 const sefiPairAddress = `${process.env["sefiPairAddress"] || "secret1l56ke78aj9jxr4wu64h4rm20cnqxevzpf6tmfc"}`;
-const alterAddress = 'secret12rcvz0umvk875kd6a803txhtlu7y0pnd73kcej';
-const alterPairAddress = 'secret1e9538dxjc8urfz3vstzl4h28m4waaggchk7pet'
 
 const getSecretJs = (): CosmWasmClient => {
     return new CosmWasmClient(`${process.env["secretNodeURL"]}`,
@@ -55,7 +53,6 @@ class SecretSwapOracle implements PriceOracle {
 
     symbolMap = {
         "SEFI": {address: sefiAddress, pair: sefiPairAddress},
-        "ALTER": {address: alterAddress, pair: alterPairAddress},
     }
 
     symbolToID = symbol => {
@@ -130,16 +127,9 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
             throw new Error("Failed to get tokens from collection");
         }
     );
-    const secretTokens = await db.collection("secret_tokens").find({}).limit(100).toArray().catch(
-        (err: any) => {
-            context.log(err);
-            throw new Error("Failed to get tokens from collection");
-        }
-    );
-    tokens.concat(secretTokens);
     context.log(tokens);
 
-    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI" || t?.display_props?.symbol === "ALTER");
+    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI");
 
     context.log(sefiTokens);
 
