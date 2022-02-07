@@ -96,7 +96,7 @@ const getLPPrice = async (queryClient: CosmWasmClient, contractAddress: string, 
 
     const tokenPrice = token.price;
 
-    context.log(`p1 price: ${tokenPrice}`);
+    context.log(`p1 (${token.name}) price: ${tokenPrice}`);
 
     const tokenInfo = (await queryClient.queryContractSmart(contractAddress, queryTokenInfo())).token_info;
     context.log(`total tokens: ${JSON.stringify(tokenInfo)}`);
