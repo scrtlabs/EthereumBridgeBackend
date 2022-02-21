@@ -139,7 +139,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     tokens = tokens.concat(secretTokens);
     context.log(tokens);
 
-    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI" || t?.display_props?.symbol === "shd");
+    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI" || t?.display_props?.symbol === "SHD");
 
     context.log(sefiTokens);
 
