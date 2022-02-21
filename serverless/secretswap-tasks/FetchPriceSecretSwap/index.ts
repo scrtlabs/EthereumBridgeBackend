@@ -20,6 +20,8 @@ const seed = Uint8Array.from([
 
 const sefiAddress = `${process.env["sefiAddress"] || "secret12q2c5s5we5zn9pq43l0rlsygtql6646my0sqfm"}`;
 const sefiPairAddress = `${process.env["sefiPairAddress"] || "secret1l56ke78aj9jxr4wu64h4rm20cnqxevzpf6tmfc"}`;
+const shdAddress = 'secret1qfql357amn448duf5gvp9gr48sxx9tsnhupu3d';
+const shdPairAddress = 'secret1wwt7nh3zyzessk8c5d98lpfsw79vzpsnerj6d0'
 
 const getSecretJs = (): CosmWasmClient => {
     return new CosmWasmClient(`${process.env["secretNodeURL"]}`,
@@ -53,6 +55,7 @@ class SecretSwapOracle implements PriceOracle {
 
     symbolMap = {
         "SEFI": {address: sefiAddress, pair: sefiPairAddress},
+        "SHD": {address: shdAddress, pair: shdPairAddress},
     }
 
     symbolToID = symbol => {
@@ -120,16 +123,23 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     );
     const db = await client.db(`${process.env["mongodbName"]}`);
 
-    const tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
+    let tokens = await db.collection("token_pairing").find({}).limit(100).toArray().catch(
         async (err: any) => {
             context.log(err);
             await client.close();
             throw new Error("Failed to get tokens from collection");
         }
     );
+    const secretTokens = await db.collection("secret_tokens").find({}).limit(100).toArray().catch(
+        (err: any) => {
+            context.log(err);
+            throw new Error("Failed to get tokens from collection");
+        }
+    );
+    tokens = tokens.concat(secretTokens);
     context.log(tokens);
 
-    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI");
+    const sefiTokens = tokens.filter(t => t?.display_props?.symbol === "SEFI" || t?.display_props?.symbol === "shd");
 
     context.log(sefiTokens);
 
@@ -179,6 +189,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         averagePrices.map(async p => {
             if (!isNaN(Number(p.price))) {
                 await db.collection("token_pairing").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
+                await db.collection("secret_tokens").updateOne({"display_props.symbol": p.symbol}, { $set: { price: p.price }});
             }
         })).catch(
         async (err) => {
