@@ -100,5 +100,5 @@ export const priceFromPoolInScrt = async (secretjs: CosmWasmClient,
     // eslint-disable-next-line @typescript-eslint/camelcase
     const { return_amount } = await handleSimulation(secretjs, input, pair, context);
 
-    return Number(return_amount) / (10 ** decimals);
+    return Number(return_amount) / (10 ** 6 /* decimals of SCRT */);
 };
