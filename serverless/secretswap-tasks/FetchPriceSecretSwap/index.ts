@@ -54,8 +54,8 @@ const getScrtPrice = async (): Promise<number> => {
 class SecretSwapOracle implements PriceOracle {
 
     symbolMap = {
-        "SEFI": {address: sefiAddress, pair: sefiPairAddress},
-        "SHD": {address: shdAddress, pair: shdPairAddress},
+        "SEFI": {address: sefiAddress, pair: sefiPairAddress, decimals: 6},
+        "SHD": {address: shdAddress, pair: shdPairAddress, decimals: 8},
     }
 
     symbolToID = symbol => {
@@ -87,7 +87,7 @@ class SecretSwapOracle implements PriceOracle {
                     };
                 }
 
-                const priceRelative = await priceFromPoolInScrt(secretjs, swapAddress.address, swapAddress.pair, context);
+                const priceRelative = await priceFromPoolInScrt(secretjs, swapAddress.address, swapAddress.pair, swapAddress.decimals, context);
                 context.log(`Got relative price: ${JSON.stringify(priceRelative)}`);
                 return {
                     symbol: symbol,
@@ -154,6 +154,7 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
         await client.close();
         throw new Error("Failed to get symbol for token");
     }
+
     context.log(`sefi token symbol: ${symbols}`);
     const prices: PriceResult[][] = await Promise.all(oracles.map(
         async o => (await o.getPrices(symbols, context)).filter(p => !isNaN(Number(p.price)))
